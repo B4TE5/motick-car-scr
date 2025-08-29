@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚗 Plataforma de Automatización de Datos Vehiculares Wallapop
+# 🚗 Plataforma de Automatización de Datos en Coches de Wallapop
 
 <p>
 <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=github" alt="Build Status">
@@ -9,7 +9,7 @@
 <img src="https://img.shields.io/badge/Status-Automatizado-orange?style=for-the-badge" alt="Status">
 </p>
 
-### 📊 Sistema empresarial de extracción y análisis automatizado de datos vehiculares
+### 📊 Sistema empresarial de extracción y análisis automatizado de datos en coches
 
 </div>
 
@@ -17,7 +17,7 @@
 
 ## 🎯 Descripción General
 
-> **Plataforma de Automatización de Datos Vehiculares Wallapop** es una solución empresarial diseñada para extraer, procesar y organizar sistemáticamente datos de inventario vehicular de concesionarios profesionales en el marketplace de Wallapop.
+> **Plataforma de Automatización de Datos Vehiculares Wallapop** es una solución empresarial diseñada para extraer, procesar y organizar sistemáticamente datos de inventario de coches de concesionarios profesionales en el marketplace de Wallapop.
 
 <table>
 <tr>
