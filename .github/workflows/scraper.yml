@@ -17,7 +17,7 @@ on:
 jobs:
   scrape-wallapop:
     runs-on: ubuntu-latest
-    timeout-minutes: 180  # 3 horas maximo
+    timeout-minutes: 720  # 12 horas maximo
     
     steps:
     - name: Checkout Repository
