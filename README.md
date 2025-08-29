@@ -9,7 +9,7 @@
 <img src="https://img.shields.io/badge/Status-Automatizado-orange?style=for-the-badge" alt="Status">
 </p>
 
-### 📊 Sistema de extracción y automatización de datos en coches de Wallapop
+### Sistema de extracción y automatización de datos en coches de Wallapop
 
 </div>
 
@@ -24,6 +24,7 @@
 <td width="50%">
 
 **🔍 Extracción Inteligente**
+
 - Monitoreo continuo automatizado
 - Más de 15 concesionarios profesionales
 - Procesamiento de 5.000+ anuncios diarios
@@ -32,6 +33,7 @@
 <td width="50%">
 
 **☁️ Integración Cloud**
+
 - Exportación directa a Google Sheets
 - Infraestructura GitHub Actions
 - Operación completamente autónoma
