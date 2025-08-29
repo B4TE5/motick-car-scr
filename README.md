@@ -19,7 +19,7 @@
 
 > **Plataforma de Automatización de Datos Vehiculares Wallapop** es una solución empresarial diseñada para extraer, procesar y organizar sistemáticamente datos de inventario de coches de concesionarios profesionales en el marketplace de Wallapop.
 
-<table align="center">
+<table>
 <tr>
 <td width="50%">
 
