@@ -1,70 +1,114 @@
 <div align="center">
 
-# Plataforma de Automatización Datos de Coches Wallapop
+# 🚗 Plataforma de Automatización de Datos Vehiculares Wallapop
 
-![Build Status](https://github.com/B4TE5/wallapop_coches_scraper/workflows/Wallapop%20Scraper%20Automation/badge.svg)
-![Python](https://img.shields.io/badge/Python-3.11+-2b5b84.svg)
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Google Sheets](https://img.shields.io/badge/Google%20Sheets-Integrado-34a853.svg)
+<p>
+<img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=github" alt="Build Status">
+<img src="https://img.shields.io/badge/Python-3.11+-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+<img src="https://img.shields.io/badge/Google%20Sheets-Integrado-34a853?style=for-the-badge&logo=google-sheets&logoColor=white" alt="Google Sheets">
+<img src="https://img.shields.io/badge/Status-Automatizado-orange?style=for-the-badge" alt="Status">
+</p>
 
-### Sistema empresarial de extracción y análisis automatizado de datos vehiculares
+### 📊 Sistema empresarial de extracción y análisis automatizado de datos vehiculares
 
 </div>
 
 ---
 
-## Descripción General
+## 🎯 Descripción General
 
-**Plataforma de Automatización de Datos Vehiculares Wallapop** es una solución empresarial diseñada para extraer, procesar y organizar sistemáticamente datos de inventario vehicular de concesionarios profesionales en el marketplace de Wallapop. El sistema opera de forma completamente autónoma, proporcionando inteligencia de mercado en tiempo real a través de pipelines de datos automatizados.
+> **Plataforma de Automatización de Datos Vehiculares Wallapop** es una solución empresarial diseñada para extraer, procesar y organizar sistemáticamente datos de inventario vehicular de concesionarios profesionales en el marketplace de Wallapop.
 
-### Capacidades Principales
+<table>
+<tr>
+<td width="50%">
 
-- **Extracción Automatizada de Datos**: Monitoreo continuo de más de 15 concesionarios vehiculares profesionales
-- **Procesamiento en Tiempo Real**: Extracción y procesamiento diario de más de 5.000 anuncios vehiculares
-- **Integración Cloud**: Exportación directa a Google Sheets con formato automatizado
-- **Operación Sin Mantenimiento**: Ejecución completamente autónoma mediante infraestructura GitHub Actions
+**🔍 Extracción Inteligente**
+- Monitoreo continuo automatizado
+- Más de 15 concesionarios profesionales
+- Procesamiento de 5.000+ anuncios diarios
+
+</td>
+<td width="50%">
+
+**☁️ Integración Cloud**
+- Exportación directa a Google Sheets
+- Infraestructura GitHub Actions
+- Operación completamente autónoma
+
+</td>
+</tr>
+</table>
 
 ---
 
-## Arquitectura Técnica
+## 🏗️ Arquitectura Técnica
+
+<div align="center">
+
+```mermaid
+graph TD
+    A[GitHub Actions] --> B[Python 3.11 Engine]
+    B --> C[Selenium WebDriver]
+    C --> D[Chrome Headless]
+    D --> E[Data Processing]
+    E --> F[Google Sheets API]
+    E --> G[Excel Backups]
+```
+
+</div>
 
 <details>
-<summary><strong>Componentes del Sistema</strong></summary>
+<summary><strong>🔧 Componentes del Sistema</strong></summary>
 
-```
+```bash
 Entorno de Producción
-├── GitHub Actions (Pipeline CI/CD)
-├── Python 3.11 (Motor de Procesamiento)
-├── Selenium WebDriver (Automatización de Navegador)
-├── Google Sheets API (Almacenamiento de Datos)
-└── Chrome Headless (Motor de Renderizado)
+├── 🚀 GitHub Actions (Pipeline CI/CD)
+├── 🐍 Python 3.11 (Motor de Procesamiento)
+├── 🌐 Selenium WebDriver (Automatización de Navegador)
+├── 📊 Google Sheets API (Almacenamiento de Datos)
+└── 🖥️ Chrome Headless (Motor de Renderizado)
 ```
 
 </details>
 
-### Pipeline de Procesamiento de Datos
+---
 
-1. **Monitoreo de Fuentes**: Escaneo automatizado de perfiles de concesionarios configurados
-2. **Extracción de Contenido**: Recuperación sistemática de especificaciones vehiculares y precios
-3. **Normalización de Datos**: Estandarización de formatos, divisas y clasificaciones
-4. **Validación de Calidad**: Verificación automatizada de completitud y precisión de datos
-5. **Exportación Cloud**: Subida directa al espacio de trabajo Google Sheets designado
-6. **Generación de Backups**: Artifacts Excel automatizados para redundancia de datos
+## ⚙️ Pipeline de Procesamiento
+
+<div align="center">
+
+| Fase | Proceso | Descripción |
+|------|---------|-------------|
+| **1️⃣** | **Monitoreo** | Escaneo automatizado de concesionarios |
+| **2️⃣** | **Extracción** | Recuperación de datos vehiculares |
+| **3️⃣** | **Normalización** | Estandarización de formatos |
+| **4️⃣** | **Validación** | Verificación de calidad |
+| **5️⃣** | **Exportación** | Subida a Google Sheets |
+| **6️⃣** | **Backup** | Generación de artifacts |
+
+</div>
 
 ---
 
-## Configuración
+## 🛠️ Configuración
 
-### Prerrequisitos
+### 📋 Prerrequisitos
 
-- Repositorio GitHub con Actions habilitado
-- Proyecto Google Cloud Platform con acceso a Sheets API
-- Credenciales de cuenta de servicio con permisos apropiados
+<div align="center">
 
-### Instrucciones de Configuración
+| Requisito | Estado | Descripción |
+|-----------|--------|-------------|
+| GitHub Actions | ✅ | Repositorio con Actions habilitado |
+| Google Cloud | ✅ | Proyecto con Sheets API |
+| Service Account | ✅ | Credenciales con permisos apropiados |
+
+</div>
+
+### 🔧 Instrucciones de Configuración
 
 <details>
-<summary><strong>1. Configuración Google Cloud</strong></summary>
+<summary><strong>☁️ Configuración Google Cloud</strong></summary>
 
 ```bash
 # Habilitar APIs requeridas
@@ -79,162 +123,194 @@ gcloud iam service-accounts create wallapop-scraper-bot \
 </details>
 
 <details>
-<summary><strong>2. Configuración GitHub Secrets</strong></summary>
+<summary><strong>🔐 Configuración GitHub Secrets</strong></summary>
 
-Navegar a: `Configuración del Repositorio → Secrets and Variables → Actions`
+**Ubicación:** `Repositorio → Settings → Secrets and Variables → Actions`
 
-Secrets requeridos:
-- `GOOGLE_CREDENTIALS_JSON`: Credenciales JSON completas de la cuenta de servicio
-- `GOOGLE_SHEET_ID`: Identificador del documento Google Sheets objetivo
+| Secret | Descripción |
+|--------|-------------|
+| `GOOGLE_CREDENTIALS_JSON` | Credenciales JSON completas |
+| `GOOGLE_SHEET_ID` | ID del documento objetivo |
 
 </details>
 
 <details>
-<summary><strong>3. Configuración Google Sheets</strong></summary>
+<summary><strong>📊 Configuración Google Sheets</strong></summary>
 
-1. Crear nuevo documento Google Sheets
-2. Compartir con email de cuenta de servicio (permisos de Editor)
-3. Extraer Sheet ID de la URL del documento
-4. Configurar como secret `GOOGLE_SHEET_ID`
+1. **Crear** nuevo documento Google Sheets
+2. **Compartir** con email de cuenta de servicio (Editor)
+3. **Extraer** Sheet ID de la URL
+4. **Configurar** como secret `GOOGLE_SHEET_ID`
 
 </details>
 
 ---
 
-## Operación
+## 🚀 Operación
 
-### Ejecución Automatizada
+### ⏰ Ejecución Automatizada
 
-El sistema opera con **programación diaria a las 08:00 UTC** sin requerir intervención manual.
+<div align="center">
 
-### Ejecución Manual
+**📅 Programación:** Diario a las **08:00 UTC**  
+**🤖 Intervención:** Sin requerimiento manual
 
-Acceso mediante interfaz GitHub Actions:
+</div>
+
+### 🎮 Ejecución Manual
+
 ```
-Repositorio → Actions → Wallapop Scraper Automation → Run workflow
+📍 Ubicación: Repositorio → Actions → Wallapop Scraper Automation → Run workflow
 ```
 
-**Modo Prueba**: Habilitar para validación de alcance limitado (un solo concesionario)  
-**Modo Producción**: Extracción completa de todos los concesionarios configurados
+<table>
+<tr>
+<td align="center" width="50%">
+
+**🧪 Modo Prueba**  
+*Validación de alcance limitado*  
+Un solo concesionario
+
+</td>
+<td align="center" width="50%">
+
+**🏭 Modo Producción**  
+*Extracción completa*  
+Todos los concesionarios
+
+</td>
+</tr>
+</table>
 
 ---
 
-## Salida de Datos
+## 🏢 Red de Concesionarios
 
-### Estructura Google Sheets
+<div align="center">
 
-Las hojas diarias se generan automáticamente con formato: `SCR DD/MM/YY`
+**📊 Monitoreo Actual:** `18 concesionarios profesionales` en toda España
 
-**Esquema de Datos:**
-| Columna | Tipo | Descripción |
-|---------|------|-------------|
-| Marca | String | Fabricante del vehículo |
-| Modelo | String | Designación completa del modelo |
-| Vendedor | String | Identificación del concesionario |
-| Año | Integer | Año de fabricación |
-| KM | String | Kilometraje (formateado) |
-| Precio al Contado | String | Precio al contado |
-| Precio Financiado | String | Precio financiado |
-| Combustible | String | Tipo de combustible |
-| URL | String | URL del anuncio fuente |
-| Fecha Extracción | Date | Timestamp de procesamiento |
-
-### Métricas de Rendimiento
-
-- **Capacidad de Procesamiento**: Más de 5.000 anuncios por ejecución
-- **Precisión de Extracción**: Más del 95% de completitud de datos
-- **Tiempo de Ejecución**: 2-4 horas (ejecución completa de producción)
-- **Fiabilidad**: Más del 99% de tasa de finalización exitosa
-
----
-
-## Red de Concesionarios
-
-El alcance actual de monitoreo incluye **18 concesionarios profesionales** en toda España:
+</div>
 
 <details>
-<summary><strong>Grupo 1 - Concesionarios Principales</strong></summary>
+<summary><strong>🥇 Grupo 1 - Concesionarios Principales</strong></summary>
 
-- DURSAN D. (~50 anuncios)
-- Beatriz D. (~100 anuncios) 
-- GESTICAR G. (~200 anuncios)
-- Garage Club C. (~150 anuncios)
+| Concesionario | Volumen Aprox. |
+|--------------|----------------|
+| DURSAN D. | ~50 anuncios |
+| Beatriz D. | ~100 anuncios |
+| GESTICAR G. | ~200 anuncios |
+| Garage Club C. | ~150 anuncios |
 
 </details>
 
 <details>
-<summary><strong>Grupo 2 - Concesionarios Secundarios</strong></summary>
+<summary><strong>🥈 Grupo 2 - Concesionarios Secundarios</strong></summary>
 
-- Red MundiCars (~800 anuncios)
-- OCASIONPLUS E. (~1.500 anuncios)
-- Red CRESTANEVADA (~1.200 anuncios)
+| Concesionario | Volumen Aprox. |
+|--------------|----------------|
+| Red MundiCars | ~800 anuncios |
+| OCASIONPLUS E. | ~1.500 anuncios |
+| Red CRESTANEVADA | ~1.200 anuncios |
 
 </details>
 
 <details>
-<summary><strong>Grupo 3 - Concesionarios de Gran Volumen</strong></summary>
+<summary><strong>🥉 Grupo 3 - Gran Volumen</strong></summary>
 
-- GRUPO O. (~2.000+ anuncios)
-- INTEGRAL MOTION (~1.000 anuncios)
-- Concesionarios regionales adicionales
+| Concesionario | Volumen Aprox. |
+|--------------|----------------|
+| GRUPO O. | ~2.000+ anuncios |
+| INTEGRAL MOTION | ~1.000 anuncios |
+| Otros regionales | Variables |
 
 </details>
 
 ---
 
-## Monitoreo del Sistema
+## 📈 Métricas de Rendimiento
 
-### Logs de Ejecución
-Logs de procesamiento en tiempo real disponibles mediante la interfaz GitHub Actions con seguimiento detallado paso a paso de la ejecución.
+<div align="center">
 
-### Manejo de Errores
-Mecanismos comprensivos de recuperación de errores incluyendo:
-- Lógica de reintento automático para extracciones fallidas
-- Manejo elegante de timeouts de red
-- Protocolos de validación y corrección de datos
+| Métrica | Valor | Descripción |
+|---------|-------|-------------|
+| **📊 Capacidad** | `5.000+` | Anuncios por ejecución |
+| **🎯 Precisión** | `95%+` | Completitud de datos |
+| **⏱️ Tiempo** | `2-4h` | Ejecución completa |
+| **🛡️ Fiabilidad** | `99%+` | Finalización exitosa |
 
-### Sistemas de Backup
-- **Exportaciones Excel automatizadas** retenidas durante 30 días
-- **Control de versiones** de todos los cambios de configuración
-- **Capacidades de rollback** para recuperación del sistema
+</div>
 
 ---
 
-## Mantenimiento
+## 🔍 Monitoreo del Sistema
 
-### Actualizaciones del Sistema
-- **Actualizaciones automáticas de dependencias** mediante Dependabot
-- **Gestión de parches de seguridad** a través de GitHub Actions
-- **Compatibilidad de navegador** mantenida automáticamente
+### 📋 Logs de Ejecución
+> Procesamiento en tiempo real mediante interfaz GitHub Actions con seguimiento detallado
 
-### Gestión de Configuración
-Todas las configuraciones de concesionarios gestionadas mediante archivos de configuración con control de versiones con seguimiento de cambios y flujos de trabajo de aprobación.
+### 🛠️ Manejo de Errores
+- **🔄 Reintentos automáticos** para extracciones fallidas
+- **🌐 Manejo de timeouts** de red elegante  
+- **✅ Validación de datos** y corrección automática
 
----
-
-## Soporte y Documentación
-
-### Soporte Técnico
-- **Seguimiento de Issues**: GitHub Issues con triage automatizado
-- **Documentación**: Documentación comprehensiva inline en el código
-- **Registro de Cambios**: Historial detallado de versiones y notas de release
-
-### Información de Contacto
-Para consultas técnicas o solicitudes de modificación del sistema, utilizar el sistema GitHub Issues.
+### 💾 Sistemas de Backup
+- **📁 Excel automatizado** (30 días retención)
+- **🔄 Control de versiones** completo
+- **↩️ Rollback capabilities** para recuperación
 
 ---
 
-## Licencia
+## 🔧 Mantenimiento
 
-Este proyecto es software propietario desarrollado para operaciones comerciales internas. Todos los derechos reservados.
+<table>
+<tr>
+<td width="50%">
+
+### 🆙 Actualizaciones Automáticas
+- Dependencias via Dependabot
+- Parches de seguridad GitHub Actions  
+- Compatibilidad de navegador
+
+</td>
+<td width="50%">
+
+### ⚙️ Gestión de Configuración
+- Control de versiones
+- Seguimiento de cambios
+- Flujos de aprobación
+
+</td>
+</tr>
+</table>
+
+---
+
+## 📞 Soporte y Documentación
+
+### 🛎️ Soporte Técnico
+- **📝 Issues:** GitHub Issues con triage automatizado
+- **📚 Docs:** Documentación inline comprehensiva  
+- **📋 Changelog:** Historial detallado de versiones
+
+### 📧 Contacto
+> Para consultas técnicas utilizar sistema **GitHub Issues**
+
+---
+
+## 📄 Licencia
+
+> **Software Propietario** - Desarrollado para operaciones comerciales internas  
+> Todos los derechos reservados
 
 ---
 
 <div align="center">
 
-**Plataforma de Automatización de Datos Vehiculares Wallapop**  
+<img src="https://img.shields.io/badge/Wallapop-Plataforma%20Empresarial-FF6B35?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+
+**Plataforma de Automatización de Datos Vehiculares**  
 *MOTICK.COM*
 
-Versión 12.3 • Última Actualización: Agosto 2025
+**Versión 12.3** • **Agosto 2025**
 
 </div>
