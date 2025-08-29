@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚗 Plataforma de Automatización de Datos en Coches de Wallapop 🚗
+# 🚗 Plataforma de Automatización de Datos en Coches de Wallapop
 
 <p>
 <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=github" alt="Build Status">
