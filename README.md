@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚗 Plataforma de Automatización de Datos en Coches de Wallapop
+# 🚗 Plataforma de Scrapeo de Coches en Wallapop
 
 <p>
 <img src="https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=github" alt="Build Status">
@@ -9,7 +9,7 @@
 <img src="https://img.shields.io/badge/Status-Automatizado-orange?style=for-the-badge" alt="Status">
 </p>
 
-### 📊 Sistema empresarial de extracción y análisis automatizado de datos en coches
+### 📊 Sistema de extracción y automatización de datos en coches de Wallapop
 
 </div>
 
