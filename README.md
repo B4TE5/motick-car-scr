@@ -114,10 +114,12 @@ Entorno de Producción
 
 ```bash
 # Habilitar APIs requeridas
+
 gcloud services enable sheets.googleapis.com
 gcloud services enable drive.googleapis.com
 
 # Crear cuenta de servicio
+
 gcloud iam service-accounts create wallapop-scraper-bot \
     --display-name="Cuenta de Servicio Wallapop Scraper"
 ```
