@@ -114,12 +114,10 @@ Entorno de Producción
 
 ```bash
 # Habilitar APIs requeridas
-
 gcloud services enable sheets.googleapis.com
 gcloud services enable drive.googleapis.com
 
 # Crear cuenta de servicio
-
 gcloud iam service-accounts create wallapop-scraper-bot \
     --display-name="Cuenta de Servicio Wallapop Scraper"
 ```
@@ -171,14 +169,14 @@ gcloud iam service-accounts create wallapop-scraper-bot \
 <tr>
 <td align="center" width="50%">
 
-**🧪 Modo Prueba**  
+** Modo Prueba**  
 *Validación de alcance limitado*  
 Un solo concesionario
 
 </td>
 <td align="center" width="50%">
 
-**🏭 Modo Producción**  
+** Modo Producción**  
 *Extracción completa*  
 Todos los concesionarios
 
@@ -192,7 +190,7 @@ Todos los concesionarios
 
 <div align="center">
 
-**📊 Monitoreo Actual:** `18 concesionarios profesionales` en toda España
+** Monitoreo Actual:** `18 concesionarios profesionales` en toda España
 
 </div>
 
@@ -201,10 +199,10 @@ Todos los concesionarios
 
 | Concesionario | Volumen Aprox. |
 |--------------|----------------|
-| DURSAN D. | ~50 anuncios |
-| Beatriz D. | ~100 anuncios |
+| DURSAN D. | ~400 anuncios |
+| Beatriz D. | ~400 anuncios |
 | GESTICAR G. | ~200 anuncios |
-| Garage Club C. | ~150 anuncios |
+| Garage Club C. | ~100 anuncios |
 
 </details>
 
@@ -226,7 +224,7 @@ Todos los concesionarios
 |--------------|----------------|
 | GRUPO O. | ~2.000+ anuncios |
 | INTEGRAL MOTION | ~1.000 anuncios |
-| Otros regionales | Variables |
+| FlexCar | ~2.000+ anuncios |
 
 </details>
 
