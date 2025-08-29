@@ -1,6 +1,6 @@
 <div align="center">
 
-# Plataforma de Automatización de Datos Vehiculares Wallapop
+# Plataforma de Automatización Datos de Coches Wallapop
 
 ![Build Status](https://github.com/B4TE5/wallapop_coches_scraper/workflows/Wallapop%20Scraper%20Automation/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.11+-2b5b84.svg)
