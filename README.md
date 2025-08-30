@@ -99,47 +99,6 @@ Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Ex
 - Archivos Excel (backup local)
 - Hojas individuales por vendedor
 
-## Detalles Técnicos
-
-### Configuración del Navegador
-
-Configuración optimizada de Chrome para el entorno GitHub Actions:
-- Modo headless con pantalla virtual
-- Optimizaciones agresivas de rendimiento
-- Carga de imágenes deshabilitada
-- Huella de memoria reducida
-
-### Manejo de Errores
-
-- Reintentos automáticos para extracciones fallidas
-- Gestión elegante de timeouts
-- Sistema integral de logging
-- Estrategias de extracción de respaldo
-
-### Optimizaciones de Rendimiento
-
-- Capacidades de procesamiento concurrente
-- Navegación DOM eficiente
-- Tiempos de espera mínimos entre solicitudes
-- Manejo inteligente de paginación
-
-## Monitoreo
-
-### Logs de Ejecución
-Logs de procesamiento en tiempo real disponibles en la interfaz de GitHub Actions
-
-### Métricas de Éxito
-- Tasa de finalización de extracción
-- Resultados de validación de datos
-- Análisis de tiempo de rendimiento
-- Reportes de clasificación de errores
-
-### Sistema de Backup
-- Generación automática de Excel
-- Retención de artifacts por 30 días
-- Integración con control de versiones
-- Procedimientos de recuperación
-
 ## Estructura del Proyecto
 
 ```
