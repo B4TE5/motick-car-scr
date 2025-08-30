@@ -22,7 +22,7 @@ Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extr
 - **5,000+** vehículos procesados diariamente
 - **95%+** tasa de completitud de datos
 - **3 horas** ventana de ejecución
-- **Diario** ejecuciones automáticas a las 08:00 UTC
+- **Diario** ejecuciones automáticas a las 06:00 AM (España)
 
 ## 🏗️ Arquitectura
 
@@ -35,7 +35,6 @@ GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Dato
 - **Selenium WebDriver** con Chrome headless
 - **Google Sheets API** para almacenamiento de datos
 - **GitHub Actions** para automatización
-- **Backups Excel** con retención de 30 días
 
 ## 🚀 Inicio Rápido
 
