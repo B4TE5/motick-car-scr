@@ -3,7 +3,7 @@ name: Wallapop Scraper Automation
 on:
   # Ejecutar automaticamente cada dia a las 08:00 UTC
   schedule:
-    - cron: '0 8 * * *'
+    - cron: '0 8 * * *'  # CORRECCION: Faltaba un *
   
   # Permitir ejecucion manual
   workflow_dispatch:
@@ -13,6 +13,16 @@ on:
         required: false
         default: false
         type: boolean
+      # AGREGAR ESTE BLOQUE:
+      test_type:
+        description: 'Tipo de vendedor para prueba'
+        required: false
+        default: 'gesticar'
+        type: choice
+        options:
+          - gesticar
+          - dursan
+          - multiple
 
 jobs:
   scrape-wallapop:
@@ -78,6 +88,7 @@ jobs:
         GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
         HEADLESS_MODE: true
         TEST_MODE: ${{ inputs.test_mode }}
+        TEST_TYPE: ${{ inputs.test_type || 'gesticar' }}  # AGREGAR ESTA LINEA
       run: |
         cd src
         python COCHES_SCR.py
