@@ -1,12 +1,12 @@
 <div align="center">
 
-# Wallapop Car Scraper
+# 🚗 Wallapop Car Scraper 🚗
 
 **Sistema automatizado de extracción de datos para concesionarios profesionales en Wallapop**
 
 [![Build](https://img.shields.io/badge/Build-Passing-success)](https://github.com/your-repo/wallapop-scraper) [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org) [![License](https://img.shields.io/badge/License-Private-red)](LICENSE)
 
-## 📊 Dashboard de Datos en Vivo
+## 📊 Excel de Datos Diario
 
 **Ver datos extraídos:** [Google Sheets Dashboard](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
 
