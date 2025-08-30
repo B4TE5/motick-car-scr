@@ -106,4 +106,25 @@ Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Ex
 
 ---
 
-**Desarrollado por Carlos Peraza.** • **Versión 12.5** • **Agosto 2025**
+---
+
+<div align="center">
+
+### 🚗 Desarrollado para MOTICK.COM
+
+**Plataforma de Automatización de Datos Vehiculares**
+
+---
+
+**Desarrollado por:** Carlos Peraza  
+**Versión:** 12.3 • **Fecha:** Agosto 2025
+
+<img src="https://img.shields.io/badge/MOTICK.COM-Solución%20Empresarial-FF6B35?style=for-the-badge&labelColor=2d3748" alt="MOTICK.COM">
+
+---
+
+*Sistema de extracción automatizada diseñado para operaciones comerciales profesionales*
+
+**© 2025 MOTICK.COM - Todos los derechos reservados**
+
+</div>
