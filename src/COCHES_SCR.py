@@ -1,15 +1,16 @@
 """
 ================================================================================
-                    WALLAPOP VEHICULOS - EXTRACTOR PROFESIONAL                    
+                    WALLAPOP VEHICULOS - EXTRACTOR MOTICK                    
 ================================================================================
 
 Descripcion: Sistema automatizado para extraccion de datos de vehiculos
              de vendedores profesionales en Wallapop con Google Sheets
              
 Autor: Carlos Peraza
-Version: 12.5 - PRECIOS Y BOTONES CORREGIDOS
+Version: 12.5 
 Fecha: Agosto 2025
 Compatibilidad: Python 3.8+
+Uso: Motick
 
 ================================================================================
 """
