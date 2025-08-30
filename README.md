@@ -119,7 +119,6 @@ Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Ex
 
 [![motick.com](https://img.shields.io/badge/motick.com-00f1a2?style=for-the-badge&labelColor=2d3748)](https://www.motick.com/)
 
----
 
 *Sistema de extracción automatizada diseñado para operaciones comerciales profesionales*
 
