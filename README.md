@@ -14,7 +14,7 @@
 
 ---
 
-## Descripción General
+## 🖥️ Descripción General
 
 Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extrayendo y organizando datos de inventario vehicular de forma automática. Diseñado para escalabilidad y confiabilidad sin intervención manual.
 
@@ -24,7 +24,7 @@ Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extr
 - **3 horas** ventana de ejecución
 - **Diario** ejecuciones automáticas a las 08:00 UTC
 
-## Arquitectura
+## 🏗️ Arquitectura
 
 ```
 GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Datos → Google Sheets
@@ -37,7 +37,7 @@ GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Dato
 - **GitHub Actions** para automatización
 - **Backups Excel** con retención de 30 días
 
-## Inicio Rápido
+## 🚀 Inicio Rápido
 
 ### Requisitos Previos
 
@@ -67,7 +67,7 @@ GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Dato
    
    Navegar a `Actions → Wallapop Scraper Automation → Run workflow`
 
-## Configuración
+## ⚙️ Configuración
 
 ### Grupos de Concesionarios
 
