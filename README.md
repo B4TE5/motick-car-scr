@@ -35,7 +35,6 @@ GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Dato
 - **Selenium WebDriver** con Chrome headless
 - **Google Sheets API** para almacenamiento de datos
 - **GitHub Actions** para automatización
-- **Backups Excel** con retención de 30 días
 
 ## 🚀 Inicio Rápido
 
