@@ -50,7 +50,7 @@ GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Dato
 
 1. **Clonar el repositorio**
    ```bash
-   git clone https://github.com/your-repo/wallapop-scraper.git
+   git clone https://github.com/TU-REPO/wallapop-car-scraper.git
    cd wallapop-scraper
    ```
 
