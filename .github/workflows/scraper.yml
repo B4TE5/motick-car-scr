@@ -3,7 +3,7 @@ name: Wallapop Scraper Automation
 on:
   # Ejecutar automaticamente cada dia a las 08:00 UTC
   schedule:
-    - cron: '0 8 * * *'  # CORRECCION: Faltaba un *
+    - cron: '0 21 * * *'
   
   # Permitir ejecucion manual
   workflow_dispatch:
