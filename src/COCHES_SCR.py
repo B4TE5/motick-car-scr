@@ -180,7 +180,7 @@ def print_extraction_summary(seller_name, title, precio_contado, precio_financia
     print(f"{'-' * 60}\n")
 
 def detect_monthly_price(price_text, seller_name):
-    """Detecta si un precio es mensual basado en el valor y vendedor - CORREGIDO"""
+    """Detecta si un precio es mensual basado en el valor y vendedor"""
     if not price_text or price_text.strip() == "":
         return "No especificado"
         
@@ -212,14 +212,13 @@ def detect_monthly_price(price_text, seller_name):
         return clean_text
         
     except Exception as e:
-        print(f"  [DEBUG] Error en detect_monthly_price: {e}, texto: '{price_text}'")
         return price_text if price_text else "No especificado"
 
 def extract_car_data(driver, url, seller_name):
-    """Extrae datos del coche - VERSION CORREGIDA PARA PRECIOS MULTIPLES"""
+    """Extrae datos del coche - VERSION FINAL SIN DEBUG"""
     try:
         driver.get(url)
-        time.sleep(1.5)  # Tiempo aumentado para carga de precios
+        time.sleep(1.5)
         
         # TITULO - MULTIPLES ESTRATEGIAS CON ESPERA OPTIMIZADA
         title = ""
@@ -248,38 +247,29 @@ def extract_car_data(driver, url, seller_name):
         # LIMPIAR NUMERO ID DEL FINAL DEL TITULO
         title = re.sub(r'\s*\d{10,}$', '', title)
         
-        # PRECIOS - EXTRACCION CORREGIDA CON MEJOR DEBUGGING
+        # PRECIOS - EXTRACCION CORREGIDA
         precio_contado = "No especificado"
         precio_financiado = "No especificado"
         
-        # ESPERAR A QUE CARGUEN LOS PRECIOS EXPLICITAMENTE
+        # ESPERAR A QUE CARGUEN LOS PRECIOS
         try:
             WebDriverWait(driver, 5).until(
                 EC.presence_of_element_located((By.XPATH, "//*[contains(text(), '€')]"))
             )
-            print(f"  [DEBUG] Elementos con € encontrados en la página")
         except:
-            print(f"  [DEBUG] No se encontraron elementos con € después de 5 segundos")
             pass
-        
-        # ESTRATEGIA MEJORADA: BUSCAR PRECIOS POR ETIQUETAS PRIMERO
-        print(f"  [DEBUG] Iniciando extracción de precios para {seller_name}")
         
         # 1. BUSCAR PRECIO AL CONTADO POR ETIQUETA
         try:
-            # Buscar por el label "Precio al contado" y luego el span con el precio
             contado_elements = driver.find_elements(By.XPATH, 
                 "//span[text()='Precio al contado']/following::span[contains(@class, 'ItemDetailPrice') and contains(text(), '€')]"
             )
             
             if contado_elements:
                 raw_price = contado_elements[0].text.strip()
-                print(f"  [DEBUG] Precio al contado encontrado por etiqueta: '{raw_price}'")
                 precio_contado = detect_monthly_price(raw_price, seller_name)
-            else:
-                print(f"  [DEBUG] No se encontró precio al contado por etiqueta")
-        except Exception as e:
-            print(f"  [DEBUG] Error buscando precio al contado por etiqueta: {e}")
+        except:
+            pass
         
         # 2. BUSCAR PRECIO FINANCIADO POR ETIQUETA
         try:
@@ -289,17 +279,12 @@ def extract_car_data(driver, url, seller_name):
             
             if financiado_elements:
                 raw_price = financiado_elements[0].text.strip()
-                print(f"  [DEBUG] Precio financiado encontrado por etiqueta: '{raw_price}'")
                 precio_financiado = detect_monthly_price(raw_price, seller_name)
-            else:
-                print(f"  [DEBUG] No se encontró precio financiado por etiqueta")
-        except Exception as e:
-            print(f"  [DEBUG] Error buscando precio financiado por etiqueta: {e}")
+        except:
+            pass
         
-        # 3. FALLBACK: USAR SELECTORES CSS ESPECÍFICOS SI NO ENCUENTRA POR ETIQUETAS
+        # 3. FALLBACK: USAR SELECTORES CSS ESPECÍFICOS
         if precio_contado == "No especificado":
-            print(f"  [DEBUG] Probando selectores CSS para precio al contado")
-            
             price_selectors_contado = [
                 "span.item-detail-price_ItemDetailPrice--standardFinanced__f9ceG",
                 ".item-detail-price_ItemDetailPrice--standardFinanced__f9ceG", 
@@ -313,18 +298,14 @@ def extract_car_data(driver, url, seller_name):
                     for element in elements:
                         text = element.text.strip()
                         if text and '€' in text:
-                            print(f"  [DEBUG] Precio contado CSS encontrado: '{text}' con selector: {selector}")
                             precio_contado = detect_monthly_price(text, seller_name)
                             break
                     if precio_contado != "No especificado":
                         break
-                except Exception as e:
-                    print(f"  [DEBUG] Error con selector CSS contado {selector}: {e}")
+                except:
                     continue
         
         if precio_financiado == "No especificado":
-            print(f"  [DEBUG] Probando selectores CSS para precio financiado")
-            
             price_selectors_financiado = [
                 "span.item-detail-price_ItemDetailPrice--financed__LgMRH",
                 ".item-detail-price_ItemDetailPrice--financed__LgMRH",
@@ -337,35 +318,29 @@ def extract_car_data(driver, url, seller_name):
                     for element in elements:
                         text = element.text.strip()
                         if text and '€' in text:
-                            print(f"  [DEBUG] Precio financiado CSS encontrado: '{text}' con selector: {selector}")
                             precio_financiado = detect_monthly_price(text, seller_name)
                             break
                     if precio_financiado != "No especificado":
                         break
-                except Exception as e:
-                    print(f"  [DEBUG] Error con selector CSS financiado {selector}: {e}")
+                except:
                     continue
         
-        # 4. ÚLTIMO FALLBACK: BUSCAR CUALQUIER PRECIO SI NO TIENE PRECIO AL CONTADO
+        # 4. ÚLTIMO FALLBACK: BUSCAR CUALQUIER PRECIO
         if precio_contado == "No especificado":
-            print(f"  [DEBUG] Usando último fallback para encontrar precios")
             try:
                 price_elements = driver.find_elements(By.XPATH, "//*[contains(text(), '€')]")
-                print(f"  [DEBUG] Encontrados {len(price_elements)} elementos con €")
                 
                 valid_prices = []
-                for i, elem in enumerate(price_elements[:10]):  # Limitar a 10 elementos
+                for i, elem in enumerate(price_elements[:10]):
                     try:
                         text = elem.text.strip().replace('&nbsp;', ' ').replace('\xa0', ' ')
                         if not text:
                             continue
-                            
-                        print(f"  [DEBUG] Elemento {i}: '{text}'")
                         
                         # REGEX PARA CAPTURAR PRECIOS REALISTAS
                         price_patterns = [
-                            r'(\d{1,3}(?:\.\d{3})+)\s*€',  # 15.000€ (con puntos)
-                            r'(\d{1,6})\s*€'               # 15000€ o 300€ (sin puntos, 1-6 dígitos)
+                            r'(\d{1,3}(?:\.\d{3})+)\s*€',
+                            r'(\d{1,6})\s*€'
                         ]
                         
                         for pattern in price_patterns:
@@ -375,32 +350,22 @@ def extract_car_data(driver, url, seller_name):
                                     price_clean = price_match.replace('.', '')
                                     price_value = int(price_clean)
                                     
-                                    # RANGO AMPLIADO: 50€ hasta 300.000€
                                     if 50 <= price_value <= 300000:
                                         formatted_price = f"{price_value:,}".replace(',', '.') + " €" if price_value >= 1000 else f"{price_value} €"
                                         final_price = detect_monthly_price(formatted_price, seller_name)
                                         valid_prices.append((price_value, final_price, text))
-                                        print(f"  [DEBUG] Precio válido encontrado: {price_value} -> {final_price}")
-                                except Exception as ex:
-                                    print(f"  [DEBUG] Error procesando precio {price_match}: {ex}")
+                                except:
                                     continue
-                    except Exception as ex:
-                        print(f"  [DEBUG] Error procesando elemento {i}: {ex}")
+                    except:
                         continue
                 
                 # Tomar el precio más alto como precio al contado
                 if valid_prices:
                     valid_prices = sorted(set(valid_prices), key=lambda x: x[0], reverse=True)
                     precio_contado = valid_prices[0][1]
-                    print(f"  [DEBUG] Precio final seleccionado: {precio_contado}")
-                else:
-                    print(f"  [DEBUG] No se encontraron precios válidos en el fallback")
                         
-            except Exception as e:
-                print(f"  [DEBUG] Error en último fallback de precios: {e}")
-        
-        # MOSTRAR RESULTADO FINAL DE PRECIOS
-        print(f"  [DEBUG] RESULTADO FINAL - Contado: '{precio_contado}', Financiado: '{precio_financiado}'")
+            except:
+                pass
         
         # CARACTERISTICAS - SELECTOR VERIFICADO
         attributes = extract_car_attributes(driver)
@@ -411,7 +376,7 @@ def extract_car_data(driver, url, seller_name):
         # EXTRAER MARCA Y MODELO COMPLETO DEL TITULO
         marca, modelo_completo = extract_brand_and_full_model_from_title(title)
         
-        # Logging visual con informacion de errores
+        # Logging visual limpio
         print_extraction_summary(seller_name, title, precio_contado, precio_financiado, attributes, url, main_data)
         
         return {
