@@ -1,6 +1,5 @@
 """
 Configuracion para Wallapop Scraper Automation
-
 """
 
 import os
@@ -15,8 +14,19 @@ GOOGLE_SHEET_ID = os.getenv('GOOGLE_SHEET_ID', '')
 # Para testing local - RUTA CORREGIDA
 LOCAL_CREDENTIALS_FILE = "../credentials/service-account.json"
 
-# Para testing rapido, usar solo un vendedor
+# Para testing rapido - CAMBIADO A GESTICAR PARA PROBAR PRECIOS MULTIPLES
 SELLERS_TEST = {
+    "GESTICAR G.": "https://es.wallapop.com/user/gesticarbilbao-76967810"
+}
+
+# OPCIONAL: Para testing con múltiples vendedores que tienen precios dobles
+SELLERS_TEST_MULTIPLE = {
+    "GESTICAR G.": "https://es.wallapop.com/user/gesticarbilbao-76967810",
+    "Garage Club C.": "https://es.wallapop.com/user/carlesb-25499485"
+}
+
+# OPCIONAL: Para testing solo con DURSAN (precios únicos)
+SELLERS_TEST_SIMPLE = {
     "DURSAN D.": "https://es.wallapop.com/user/dursan-96099038"
 }
 
@@ -52,10 +62,23 @@ SELLERS_GROUP_3 = {
     "INTEGRAL MOTION M.": "https://es.wallapop.com/user/integralm-463115034"
 }
 
-def get_sellers(test_mode=False, vendor_group=None):
-    """Devuelve lista de vendedores segun el modo y grupo"""
+def get_sellers(test_mode=False, vendor_group=None, test_type="gesticar"):
+    """
+    Devuelve lista de vendedores segun el modo y grupo
+    
+    Args:
+        test_mode: Si está en modo test
+        vendor_group: Grupo de vendedores (1, 2, 3)
+        test_type: Tipo de test ("gesticar", "dursan", "multiple")
+    """
     if test_mode:
-        return SELLERS_TEST
+        # Seleccionar vendedor de prueba según el tipo
+        if test_type == "dursan":
+            return SELLERS_TEST_SIMPLE
+        elif test_type == "multiple":
+            return SELLERS_TEST_MULTIPLE
+        else:  # Default: gesticar
+            return SELLERS_TEST
     
     # Seleccionar grupo de vendedores para ejecucion paralela
     vendor_group = vendor_group or int(os.getenv('VENDOR_GROUP', '0'))
