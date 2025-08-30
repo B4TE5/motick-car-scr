@@ -106,10 +106,6 @@ Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Ex
 
 ---
 
----
-
----
-
 <div align="center">
 
 ### Desarrollado para MOTICK.COM
@@ -121,7 +117,7 @@ Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Ex
 **Desarrollado por:** Carlos Peraza  
 **Versión:** 12.3 • **Fecha:** Agosto 2025
 
-<img src="https://img.shields.io/badge/motick.com-00f1a2?style=for-the-badge&labelColor=2d3748" alt="motick.com">
+[![motick.com](https://img.shields.io/badge/motick.com-00f1a2?style=for-the-badge&labelColor=2d3748)](https://www.motick.com/)
 
 ---
 
