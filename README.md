@@ -94,38 +94,16 @@ Marca, Modelo, Vendedor, Año, KM, Precio al Contado, Precio Financiado,
 Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Extracción
 ```
 
-**Formatos de Salida:**
-- Google Sheets (datos en vivo)
-- Archivos Excel (backup local)
-- Hojas individuales por vendedor
-
-## Estructura del Proyecto
-
-```
-wallapop_coches_scraper/
-├── .github/workflows/          # Automatización CI/CD
-│   ├── scraper.yml            # Workflow principal
-│   └── scraper_paralelo.yml   # Ejecución paralela
-├── src/                       # Código fuente
-│   ├── COCHES_SCR.py         # Scraper principal
-│   ├── config.py             # Configuración
-│   └── google_sheets_uploader.py
-├── credentials/               # Autenticación
-├── resultados/               # Archivos de salida
-└── requirements.txt          # Dependencias
-```
-
-## Mantenimiento
-
-### Actualizaciones Automáticas
-- Gestión de dependencias vía Dependabot
-- Parches de seguridad a través de GitHub
-- Mantenimiento de compatibilidad del navegador
-
-## Contribución
-
-Este es un proyecto comercial privado. Para consultas técnicas, usar GitHub Issues.
+### 📧 Contacto
+> Para consultas técnicas utilizar sistema **GitHub Issues**
 
 ---
 
-**Desarrollado por Carlos Peraza** • **Versión 12.5** • **Agosto 2025**
+## 📄 Licencia
+
+> **Software Propietario** - Desarrollado para operaciones comerciales internas
+> Todos los derechos reservados
+
+---
+
+**Desarrollado por Carlos Peraza.** • **Versión 12.5** • **Agosto 2025**
