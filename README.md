@@ -108,9 +108,11 @@ Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Ex
 
 ---
 
+---
+
 <div align="center">
 
-### 🚗 Desarrollado para MOTICK.COM
+### Desarrollado para MOTICK.COM
 
 **Plataforma de Automatización de Datos Vehiculares**
 
@@ -119,7 +121,7 @@ Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Ex
 **Desarrollado por:** Carlos Peraza  
 **Versión:** 12.3 • **Fecha:** Agosto 2025
 
-<img src="https://img.shields.io/badge/MOTICK.COM-Solución%20Empresarial-FF6B35?style=for-the-badge&labelColor=2d3748" alt="MOTICK.COM">
+<img src="https://img.shields.io/badge/motick.com-00f1a2?style=for-the-badge&labelColor=2d3748" alt="motick.com">
 
 ---
 
