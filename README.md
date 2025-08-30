@@ -22,7 +22,7 @@ Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extr
 - **5,000+** vehículos procesados diariamente
 - **95%+** tasa de completitud de datos
 - **3 horas** ventana de ejecución
-- **Diario** ejecuciones automáticas a las 08:00 UTC
+- **Diario** ejecuciones automáticas a las 06:00 AM (España)
 
 ## 🏗️ Arquitectura
 
