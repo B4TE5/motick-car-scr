@@ -122,15 +122,10 @@ wallapop_coches_scraper/
 - Parches de seguridad a través de GitHub
 - Mantenimiento de compatibilidad del navegador
 
-### Intervenciones Manuales
-- Revisión trimestral de lista de concesionarios
-- Optimización anual de rendimiento
-- Actualizaciones de selectores según necesidad
-
 ## Contribución
 
 Este es un proyecto comercial privado. Para consultas técnicas, usar GitHub Issues.
 
 ---
 
-**Desarrollado por Carlos Peraza** • **Versión 12.3** • **Agosto 2025**
+**Desarrollado por Carlos Peraza** • **Versión 12.5** • **Agosto 2025**
