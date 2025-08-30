@@ -1,173 +1,177 @@
+<div align="center">
+
 # Wallapop Car Scraper
 
-**Automated data extraction system for professional car dealers on Wallapop marketplace**
+**Sistema automatizado de extracción de datos para concesionarios profesionales en Wallapop**
 
 [![Build](https://img.shields.io/badge/Build-Passing-success)](https://github.com/your-repo/wallapop-scraper) [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org) [![License](https://img.shields.io/badge/License-Private-red)](LICENSE)
 
-## 📊 Live Data Dashboard
+## 📊 Dashboard de Datos en Vivo
 
-**View extracted data:** [Google Sheets Dashboard](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
+**Ver datos extraídos:** [Google Sheets Dashboard](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
+
+</div>
 
 ---
 
-## Overview
+## Descripción General
 
-This system monitors 18+ professional car dealers on Wallapop, extracting and organizing vehicle inventory data automatically. Built for scalability and reliability with zero manual intervention required.
+Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extrayendo y organizando datos de inventario vehicular de forma automática. Diseñado para escalabilidad y confiabilidad sin intervención manual.
 
-**Key Metrics:**
-- **5,000+** vehicles processed daily
-- **95%+** data completeness rate
-- **3-hour** execution window
-- **Daily** automated runs at 08:00 UTC
+**Métricas Clave:**
+- **5,000+** vehículos procesados diariamente
+- **95%+** tasa de completitud de datos
+- **3 horas** ventana de ejecución
+- **Diario** ejecuciones automáticas a las 08:00 UTC
 
-## Architecture
+## Arquitectura
 
 ```
-GitHub Actions → Python Engine → Selenium WebDriver → Data Processing → Google Sheets
+GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Datos → Google Sheets
 ```
 
-**Core Components:**
-- **Python 3.11** processing engine
-- **Selenium WebDriver** with Chrome headless
-- **Google Sheets API** for data storage
-- **GitHub Actions** for automation
-- **Excel backups** with 30-day retention
+**Componentes Principales:**
+- **Python 3.11** motor de procesamiento
+- **Selenium WebDriver** con Chrome headless
+- **Google Sheets API** para almacenamiento de datos
+- **GitHub Actions** para automatización
+- **Backups Excel** con retención de 30 días
 
-## Quick Start
+## Inicio Rápido
 
-### Prerequisites
+### Requisitos Previos
 
-- GitHub repository with Actions enabled
-- Google Cloud project with Sheets API enabled
-- Service account with appropriate permissions
-- Google Sheet with sharing permissions
+- Repositorio GitHub con Actions habilitado
+- Proyecto Google Cloud con API de Sheets habilitada
+- Cuenta de servicio con permisos apropiados
+- Google Sheet con permisos de compartición
 
-### Setup
+### Configuración
 
-1. **Clone the repository**
+1. **Clonar el repositorio**
    ```bash
    git clone https://github.com/your-repo/wallapop-scraper.git
    cd wallapop-scraper
    ```
 
-2. **Configure GitHub Secrets**
+2. **Configurar GitHub Secrets**
    
-   Go to `Settings → Secrets and Variables → Actions` and add:
+   Ir a `Settings → Secrets and Variables → Actions` y añadir:
    
-   | Secret | Description |
+   | Secret | Descripción |
    |--------|-------------|
-   | `GOOGLE_CREDENTIALS_JSON` | Complete service account JSON |
-   | `GOOGLE_SHEET_ID` | Target Google Sheet ID |
+   | `GOOGLE_CREDENTIALS_JSON` | JSON completo de la cuenta de servicio |
+   | `GOOGLE_SHEET_ID` | ID del Google Sheet destino |
 
-3. **Manual Execution**
+3. **Ejecución Manual**
    
-   Navigate to `Actions → Wallapop Scraper Automation → Run workflow`
+   Navegar a `Actions → Wallapop Scraper Automation → Run workflow`
 
-## Configuration
+## Configuración
 
-### Dealer Groups
+### Grupos de Concesionarios
 
-The system processes dealers in organized groups for optimal performance:
+El sistema procesa concesionarios en grupos organizados para rendimiento óptimo:
 
-**Group 1 (Small):** DURSAN D., Beatriz D., GESTICAR G., Garage Club C.  
-**Group 2 (Medium):** MundiCars network, OCASIONPLUS, CRESTANEVADA network  
-**Group 3 (Large):** GRUPO O., INTEGRAL MOTION, FlexCar, high-volume dealers
+**Grupo 1 (Pequeños):** DURSAN D., Beatriz D., GESTICAR G., Garage Club C.  
+**Grupo 2 (Medianos):** Red MundiCars, OCASIONPLUS, Red CRESTANEVADA  
+**Grupo 3 (Grandes):** GRUPO O., INTEGRAL MOTION, FlexCar, concesionarios de alto volumen
 
-### Execution Modes
+### Modos de Ejecución
 
-| Mode | Trigger | Scope |
-|------|---------|-------|
-| **Production** | Daily schedule | All 18+ dealers |
-| **Test** | Manual trigger | Single dealer (DURSAN D.) |
-| **Parallel** | Alternative workflow | Groups 1-3 sequentially |
+| Modo | Activación | Alcance |
+|------|------------|---------|
+| **Producción** | Programación diaria | Todos los 18+ concesionarios |
+| **Prueba** | Activación manual | Un solo concesionario (DURSAN D.) |
+| **Paralelo** | Workflow alternativo | Grupos 1-3 secuencialmente |
 
-## Data Structure
+## Estructura de Datos
 
-Extracted data includes:
+Los datos extraídos incluyen:
 
 ```
 Marca, Modelo, Vendedor, Año, KM, Precio al Contado, Precio Financiado,
 Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Extracción
 ```
 
-**Output Formats:**
-- Google Sheets (live data)
-- Excel files (local backup)
-- Individual seller sheets
+**Formatos de Salida:**
+- Google Sheets (datos en vivo)
+- Archivos Excel (backup local)
+- Hojas individuales por vendedor
 
-## Technical Details
+## Detalles Técnicos
 
-### Browser Configuration
+### Configuración del Navegador
 
-Optimized Chrome setup for GitHub Actions environment:
-- Headless mode with virtual display
-- Aggressive performance optimizations
-- Image loading disabled
-- Reduced memory footprint
+Configuración optimizada de Chrome para el entorno GitHub Actions:
+- Modo headless con pantalla virtual
+- Optimizaciones agresivas de rendimiento
+- Carga de imágenes deshabilitada
+- Huella de memoria reducida
 
-### Error Handling
+### Manejo de Errores
 
-- Automatic retries for failed extractions
-- Graceful timeout management
-- Comprehensive logging system
-- Fallback extraction strategies
+- Reintentos automáticos para extracciones fallidas
+- Gestión elegante de timeouts
+- Sistema integral de logging
+- Estrategias de extracción de respaldo
 
-### Performance Optimizations
+### Optimizaciones de Rendimiento
 
-- Concurrent processing capabilities
-- Efficient DOM traversal
-- Minimal wait times between requests
-- Smart pagination handling
+- Capacidades de procesamiento concurrente
+- Navegación DOM eficiente
+- Tiempos de espera mínimos entre solicitudes
+- Manejo inteligente de paginación
 
-## Monitoring
+## Monitoreo
 
-### Execution Logs
-Real-time processing logs available in GitHub Actions interface
+### Logs de Ejecución
+Logs de procesamiento en tiempo real disponibles en la interfaz de GitHub Actions
 
-### Success Metrics
-- Extraction completion rate
-- Data validation results
-- Performance timing analysis
-- Error classification reports
+### Métricas de Éxito
+- Tasa de finalización de extracción
+- Resultados de validación de datos
+- Análisis de tiempo de rendimiento
+- Reportes de clasificación de errores
 
-### Backup System
-- Automated Excel generation
-- 30-day artifact retention
-- Version control integration
-- Recovery procedures
+### Sistema de Backup
+- Generación automática de Excel
+- Retención de artifacts por 30 días
+- Integración con control de versiones
+- Procedimientos de recuperación
 
-## Project Structure
+## Estructura del Proyecto
 
 ```
 wallapop_coches_scraper/
-├── .github/workflows/          # CI/CD automation
-│   ├── scraper.yml            # Main workflow
-│   └── scraper_paralelo.yml   # Parallel execution
-├── src/                       # Source code
-│   ├── COCHES_SCR.py         # Main scraper
-│   ├── config.py             # Configuration
+├── .github/workflows/          # Automatización CI/CD
+│   ├── scraper.yml            # Workflow principal
+│   └── scraper_paralelo.yml   # Ejecución paralela
+├── src/                       # Código fuente
+│   ├── COCHES_SCR.py         # Scraper principal
+│   ├── config.py             # Configuración
 │   └── google_sheets_uploader.py
-├── credentials/               # Authentication
-├── resultados/               # Output files
-└── requirements.txt          # Dependencies
+├── credentials/               # Autenticación
+├── resultados/               # Archivos de salida
+└── requirements.txt          # Dependencias
 ```
 
-## Maintenance
+## Mantenimiento
 
-### Automated Updates
-- Dependency management via Dependabot
-- Security patches through GitHub
-- Browser compatibility maintenance
+### Actualizaciones Automáticas
+- Gestión de dependencias vía Dependabot
+- Parches de seguridad a través de GitHub
+- Mantenimiento de compatibilidad del navegador
 
-### Manual Interventions
-- Quarterly dealer list review
-- Annual performance optimization
-- Selector updates as needed
+### Intervenciones Manuales
+- Revisión trimestral de lista de concesionarios
+- Optimización anual de rendimiento
+- Actualizaciones de selectores según necesidad
 
-## Contributing
+## Contribución
 
-This is a private commercial project. For technical inquiries, please use GitHub Issues.
+Este es un proyecto comercial privado. Para consultas técnicas, usar GitHub Issues.
 
 ---
 
-**Developed by Carlos Peraza** • **Version 12.3** • **August 2025**
+**Desarrollado por Carlos Peraza** • **Versión 12.3** • **Agosto 2025**
