@@ -7,10 +7,9 @@ Descripcion: Sistema automatizado para extraccion de datos de vehiculos
              de vendedores profesionales en Wallapop con Google Sheets
              
 Autor: Carlos Peraza
-Version: 12.4
+Version: 12.5 - PRECIOS Y BOTONES CORREGIDOS
 Fecha: Agosto 2025
 Compatibilidad: Python 3.8+
-Uso: Motick
 
 ================================================================================
 """
@@ -208,7 +207,7 @@ def detect_monthly_price(price_text, seller_name):
         return price_text
 
 def extract_car_data(driver, url, seller_name):
-    """Extrae datos del coche - VERSION CORREGIDA CON PRECIOS MENSUALES"""
+    """Extrae datos del coche - VERSION CORREGIDA CON SELECTORES REALES"""
     try:
         driver.get(url)
         time.sleep(1.0)
@@ -240,7 +239,7 @@ def extract_car_data(driver, url, seller_name):
         # LIMPIAR NUMERO ID DEL FINAL DEL TITULO
         title = re.sub(r'\s*\d{10,}$', '', title)
         
-        # PRECIOS - EXTRACCION CORREGIDA CON DETECCION DE PRECIOS MENSUALES
+        # PRECIOS - SELECTORES CORREGIDOS SEGUN HTML REAL QUE PROPORCIONASTE
         precio_contado = "No especificado"
         precio_financiado = "No especificado"
         
@@ -251,47 +250,65 @@ def extract_car_data(driver, url, seller_name):
         except:
             pass
         
-        # SELECTOR CORREGIDO SEGUN HTML REAL
+        # SELECTORES CORREGIDOS SEGUN TU HTML REAL
         price_selectors_contado = [
-            "span.item-detail-price_ItemDetailPrice--standard__fMa16",
-            "span.item-detail-price_ItemDetailPrice--standardFinanced__f9ceG", 
-            ".item-detail-price_ItemDetailPrice--standard__fMa16",
-            "[class*='standard']"
+            "span.item-detail-price_ItemDetailPrice--standardFinanced__f9ceG",  # SELECTOR CORRECTO
+            ".item-detail-price_ItemDetailPrice--standardFinanced__f9ceG",
+            "span.item-detail-price_ItemDetailPrice--standard__fMa16",  # Fallback por si cambia
+            "[class*='standardFinanced']"
         ]
         
         for selector in price_selectors_contado:
             try:
                 element = driver.find_element(By.CSS_SELECTOR, selector)
                 if element.text.strip():
-                    raw_price = element.text.strip().replace('&nbsp;', ' ').strip()
+                    raw_price = element.text.strip().replace('&nbsp;', ' ').replace('\xa0', ' ').strip()
                     precio_contado = detect_monthly_price(raw_price, seller_name)
                     break
             except:
                 continue
         
+        # PRECIO FINANCIADO - SELECTOR CORRECTO
         price_selectors_financiado = [
-            "span.item-detail-price_ItemDetailPrice--financed__LgMRH",
-            ".item-detail-price_ItemDetailPrice--financed__LgMRH",
-            "[class*='financed']"
+            "span.item-detail-price_ItemDetailPrice--financed__LgMRH",  # SELECTOR CORRECTO SEGUN TU HTML
+            ".item-detail-price_ItemDetailPrice--financed__LgMRH"
         ]
         
         for selector in price_selectors_financiado:
             try:
                 element = driver.find_element(By.CSS_SELECTOR, selector)
                 if element.text.strip():
-                    raw_price = element.text.strip().replace('&nbsp;', ' ').strip()
+                    raw_price = element.text.strip().replace('&nbsp;', ' ').replace('\xa0', ' ').strip()
                     precio_financiado = detect_monthly_price(raw_price, seller_name)
                     break
             except:
                 continue
         
-        # FALLBACK CORREGIDO: VOLVEMOS AL ORIGINAL QUE FUNCIONA (CON €)
+        # FALLBACK OPTIMIZADO - SOLO SI NO ENCUENTRA PRECIOS CON SELECTORES ESPECIFICOS
         if precio_contado == "No especificado":
             try:
-                # Buscar todos los elementos con € (NO euros)
-                price_elements = driver.find_elements(By.XPATH, "//span[contains(text(), '€') and contains(@class, 'price')]")
-                if not price_elements:
-                    price_elements = driver.find_elements(By.XPATH, "//*[contains(text(), '€')]")
+                # Buscar elementos por label de "Precio al contado"
+                contado_label = driver.find_elements(By.XPATH, "//span[text()='Precio al contado']/following::span[contains(text(), '€')]")
+                if contado_label:
+                    raw_price = contado_label[0].text.strip().replace('&nbsp;', ' ').replace('\xa0', ' ')
+                    precio_contado = detect_monthly_price(raw_price, seller_name)
+            except:
+                pass
+        
+        if precio_financiado == "No especificado":
+            try:
+                # Buscar elementos por label de "Precio financiado"
+                financiado_label = driver.find_elements(By.XPATH, "//span[text()='Precio financiado']/following::span[contains(text(), '€')]")
+                if financiado_label:
+                    raw_price = financiado_label[0].text.strip().replace('&nbsp;', ' ').replace('\xa0', ' ')
+                    precio_financiado = detect_monthly_price(raw_price, seller_name)
+            except:
+                pass
+        
+        # ULTIMO FALLBACK - BUSCAR CUALQUIER PRECIO SI AUN NO TIENE PRECIO AL CONTADO
+        if precio_contado == "No especificado":
+            try:
+                price_elements = driver.find_elements(By.XPATH, "//*[contains(text(), '€')]")
                 
                 valid_prices = []
                 for elem in price_elements:
@@ -320,12 +337,10 @@ def extract_car_data(driver, url, seller_name):
                             except:
                                 continue
                 
-                # Ordenar por valor y tomar los mas altos (precios reales vs cuotas)
+                # Ordenar por valor y tomar el más alto como precio al contado
                 if valid_prices:
                     valid_prices = sorted(set(valid_prices), key=lambda x: x[0], reverse=True)
                     precio_contado = valid_prices[0][1]
-                    if len(valid_prices) > 1:
-                        precio_financiado = valid_prices[1][1]
                         
             except Exception as e:
                 print(f"Error en extraccion de precios fallback: {e}")
