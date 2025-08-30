@@ -7,9 +7,10 @@ Descripcion: Sistema automatizado para extraccion de datos de vehiculos
              de vendedores profesionales en Wallapop con Google Sheets
              
 Autor: Carlos Peraza
-Version: 12.3 - AUTOMATIZADA CORREGIDA
+Version: 12.4
 Fecha: Agosto 2025
 Compatibilidad: Python 3.8+
+Uso: Motick
 
 ================================================================================
 """
@@ -179,8 +180,35 @@ def print_extraction_summary(seller_name, title, precio_contado, precio_financia
     print(f"Extraccion completada")
     print(f"{'-' * 60}\n")
 
+def detect_monthly_price(price_text, seller_name):
+    """Detecta si un precio es mensual basado en el valor y vendedor"""
+    try:
+        # Extraer número del precio
+        price_match = re.search(r'(\d+(?:\.\d{3})*)', price_text.replace(',', ''))
+        if not price_match:
+            return price_text
+        
+        price_value = int(price_match.group(1).replace('.', ''))
+        
+        # CRESTANEVADA suele mostrar precios mensuales como precios totales
+        crestanevada_keywords = ['CRESTANEVADA', 'crestanevada']
+        is_crestanevada = any(keyword in seller_name for keyword in crestanevada_keywords)
+        
+        # Si es CRESTANEVADA y el precio es menor a 1000€, probablemente es mensual
+        if is_crestanevada and price_value < 1000:
+            return f"{price_value} €/mes"
+        
+        # Para otros vendedores, precios muy bajos también pueden ser mensuales
+        elif price_value < 500:
+            return f"{price_value} €/mes"
+        
+        return price_text
+        
+    except:
+        return price_text
+
 def extract_car_data(driver, url, seller_name):
-    """Extrae datos del coche - VERSION CORREGIDA QUE FUNCIONA"""
+    """Extrae datos del coche - VERSION CORREGIDA CON PRECIOS MENSUALES"""
     try:
         driver.get(url)
         time.sleep(1.0)
@@ -212,7 +240,7 @@ def extract_car_data(driver, url, seller_name):
         # LIMPIAR NUMERO ID DEL FINAL DEL TITULO
         title = re.sub(r'\s*\d{10,}$', '', title)
         
-        # PRECIOS - EXTRACCION CORREGIDA (VOLVEMOS AL ORIGINAL QUE FUNCIONABA)
+        # PRECIOS - EXTRACCION CORREGIDA CON DETECCION DE PRECIOS MENSUALES
         precio_contado = "No especificado"
         precio_financiado = "No especificado"
         
@@ -235,7 +263,8 @@ def extract_car_data(driver, url, seller_name):
             try:
                 element = driver.find_element(By.CSS_SELECTOR, selector)
                 if element.text.strip():
-                    precio_contado = element.text.strip().replace('&nbsp;', ' ').strip()
+                    raw_price = element.text.strip().replace('&nbsp;', ' ').strip()
+                    precio_contado = detect_monthly_price(raw_price, seller_name)
                     break
             except:
                 continue
@@ -250,7 +279,8 @@ def extract_car_data(driver, url, seller_name):
             try:
                 element = driver.find_element(By.CSS_SELECTOR, selector)
                 if element.text.strip():
-                    precio_financiado = element.text.strip().replace('&nbsp;', ' ').strip()
+                    raw_price = element.text.strip().replace('&nbsp;', ' ').strip()
+                    precio_financiado = detect_monthly_price(raw_price, seller_name)
                     break
             except:
                 continue
@@ -270,7 +300,7 @@ def extract_car_data(driver, url, seller_name):
                     # REGEX PARA CAPTURAR PRECIOS REALISTAS (CON €)
                     price_patterns = [
                         r'(\d{1,3}(?:\.\d{3})+)\s*€',            # 15.000€ (con puntos)
-                        r'(\d{4,6})\s*€'                         # 15000€ (sin puntos, 4-6 digitos)
+                        r'(\d{1,6})\s*€'                         # 15000€ o 300€ (sin puntos, 1-6 digitos)
                     ]
                     
                     for pattern in price_patterns:
@@ -281,10 +311,12 @@ def extract_car_data(driver, url, seller_name):
                                 price_clean = price_match.replace('.', '')
                                 price_value = int(price_clean)
                                 
-                                # RANGO REALISTA PARA COCHES: 2.000€ hasta 300.000€
-                                if 2000 <= price_value <= 300000:
-                                    formatted_price = f"{price_value:,}".replace(',', '.') + " €"
-                                    valid_prices.append((price_value, formatted_price))
+                                # RANGO AMPLIADO PARA INCLUIR PRECIOS MENSUALES: 50€ hasta 300.000€
+                                if 50 <= price_value <= 300000:
+                                    formatted_price = f"{price_value:,}".replace(',', '.') + " €" if price_value >= 1000 else f"{price_value} €"
+                                    # Detectar precios mensuales
+                                    final_price = detect_monthly_price(formatted_price, seller_name)
+                                    valid_prices.append((price_value, final_price))
                             except:
                                 continue
                 
@@ -659,39 +691,87 @@ def format_power(power_text):
     return str(power_text)
 
 def find_and_click_load_more_button(driver):
-    """Busca y hace clic en el boton 'Ver mas productos' - TIMING CORREGIDO"""
+    """Busca y hace clic en el botón 'Ver más productos' - SELECTORES CORREGIDOS PARA WEB COMPONENTS"""
     try:
-        # Scroll mas eficiente pero con tiempo suficiente
+        # Scroll más eficiente con tiempo suficiente
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(0.8)
+        time.sleep(2.0)  # Tiempo aumentado
         
+        # NUEVOS SELECTORES BASADOS EN HTML REAL DE WALLAPOP
         button_selectors = [
+            # Web component selector - el más probable
             'walla-button[text="Ver más productos"]',
+            # Button interno del web component
+            'button.walla-button__button--primary',
+            # Por clase CSS específica
+            '.walla-button__button--primary',
+            # XPath por span interno con texto
+            '//span[text()="Ver más productos"]/ancestor::button',
+            # XPath por walla-button con atributo text
             '//walla-button[@text="Ver más productos"]',
+            # XPath por contenido de texto en cualquier parte
+            '//*[contains(text(), "Ver más productos")]',
+            # Fallback genérico por clase
+            '//button[contains(@class, "walla-button__button")]',
+            # Selector por div contenedor
+            '.d-flex.justify-content-center button',
+            # XPath más genérico
             '//button[contains(text(), "Ver más")]'
         ]
         
         for selector in button_selectors:
             try:
-                if selector.startswith("//"):
+                if selector.startswith("//") or selector.startswith("//*"):
                     buttons = driver.find_elements(By.XPATH, selector)
                 else:
                     buttons = driver.find_elements(By.CSS_SELECTOR, selector)
                 
                 for button in buttons:
-                    if button.is_displayed():
-                        button_text_attr = button.get_attribute('text') or button.text or ''
-                        if 'ver más productos' in button_text_attr.lower() or 'ver más' in button_text_attr.lower():
-                            try:
-                                button.click()
-                                return True
-                            except:
-                                driver.execute_script("arguments[0].click();", button)
-                                return True
-            except:
+                    try:
+                        # Verificar que el botón esté visible y habilitado
+                        if button.is_displayed() and button.is_enabled():
+                            # Obtener texto del botón de múltiples formas
+                            button_text = (
+                                button.get_attribute('text') or 
+                                button.text or 
+                                button.get_attribute('aria-label') or 
+                                ""
+                            ).lower()
+                            
+                            # Verificar que contiene el texto esperado
+                            if any(phrase in button_text for phrase in ['ver más productos', 'ver más', 'más productos']):
+                                # Scroll al botón primero
+                                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", button)
+                                time.sleep(1.0)
+                                
+                                # Intentar click normal primero
+                                try:
+                                    button.click()
+                                    time.sleep(3.0)  # Tiempo aumentado para cargar contenido
+                                    return True
+                                except:
+                                    # Si falla, usar JavaScript click
+                                    try:
+                                        driver.execute_script("arguments[0].click();", button)
+                                        time.sleep(3.0)
+                                        return True
+                                    except:
+                                        # Si también falla, intentar click en elemento padre
+                                        try:
+                                            parent = button.find_element(By.XPATH, '..')
+                                            parent.click()
+                                            time.sleep(3.0)
+                                            return True
+                                        except:
+                                            continue
+                    except Exception as e:
+                        continue
+            except Exception as e:
                 continue
+        
         return False
-    except:
+    except Exception as e:
+        print(f"Error en find_and_click_load_more_button: {e}")
         return False
 
 def get_seller_cars(driver, seller_url, seller_name):
