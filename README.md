@@ -85,7 +85,7 @@ El sistema procesa concesionarios en grupos organizados para rendimiento óptimo
 | **Prueba** | Activación manual | Un solo concesionario (DURSAN D.) |
 | **Paralelo** | Workflow alternativo | Grupos 1-3 secuencialmente |
 
-## Estructura de Datos
+## 🔍 Estructura de Datos
 
 Los datos extraídos incluyen:
 
@@ -94,7 +94,7 @@ Marca, Modelo, Vendedor, Año, KM, Precio al Contado, Precio Financiado,
 Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Extracción
 ```
 
-### 📧 Contacto
+###  📞 Contacto
 > Para consultas técnicas utilizar sistema **GitHub Issues**
 
 ---
