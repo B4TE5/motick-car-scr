@@ -86,12 +86,25 @@ El sistema procesa concesionarios en grupos organizados para rendimiento óptimo
 
 ## 🔍 Estructura de Datos
 
-Los datos extraídos incluyen:
+| Campo               | Descripción                           |
+|---------------------|---------------------------------------|
+| **Marca**           | Marca del vehículo                   |
+| **Modelo**          | Modelo del vehículo                  |
+| **Vendedor**        | Nombre del vendedor                  |
+| **Año**             | Año de matriculación                 |
+| **KM**              | Kilometraje                          |
+| **Precio al Contado** | Precio sin financiación             |
+| **Precio Financiado** | Precio con financiación             |
+| **Tipo**            | Tipo de vehículo                     |
+| **Nº Plazas**       | Número de plazas                     |
+| **Nº Puertas**      | Número de puertas                    |
+| **Combustible**     | Tipo de combustible                  |
+| **Potencia**        | Potencia en CV                       |
+| **Conducción**      | Manual/Automática                    |
+| **URL**             | Enlace al anuncio en Wallapop        |
+| **Fecha Extracción**| Fecha en que se extrajo la información|
 
-```
-Marca, Modelo, Vendedor, Año, KM, Precio al Contado, Precio Financiado,
-Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Extracción
-```
+---
 
 ###  📞 Contacto
 > Para consultas técnicas utilizar sistema **GitHub Issues**
