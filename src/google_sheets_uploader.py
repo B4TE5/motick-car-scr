@@ -1,6 +1,26 @@
 """
-Google Sheets Uploader para Wallapop Scraper
-Sube datos de coches a Google Sheets de forma automatica
+===============================================================================
+                    GOOGLE SHEETS UPLOADER - WALLAPOP
+===============================================================================
+
+Descripción:
+    Módulo encargado de subir de forma automática los datos extraídos 
+    del scraper de Wallapop a Google Sheets. Compatible con ejecución 
+    local y entornos CI/CD (GitHub Actions).
+
+Funcionalidades principales:
+    • Autenticación con credenciales JSON (archivo o string).
+    • Prueba de conexión con Google Sheets.
+    • Subida de DataFrames a hojas específicas o por grupo de vendedores.
+    • Generación de estadísticas y metadata del dataset.
+
+Autor: Carlos Peraza
+Versión: 12.6
+Fecha: Agosto 2025
+Compatibilidad: Python 3.10+
+Uso: Motick 
+
+===============================================================================
 """
 
 import gspread
