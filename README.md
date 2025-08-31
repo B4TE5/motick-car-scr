@@ -72,9 +72,9 @@ GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Dato
 
 El sistema procesa concesionarios en grupos organizados para rendimiento óptimo:
 
-**Grupo 1 (Pequeños):** DURSAN D., Beatriz D., GESTICAR G., Garage Club C.  
-**Grupo 2 (Medianos):** Red MundiCars, OCASIONPLUS, Red CRESTANEVADA  
-**Grupo 3 (Grandes):** GRUPO O., INTEGRAL MOTION, FlexCar, concesionarios de alto volumen
+**- Grupo 1 (Pequeños):** DURSAN D., Beatriz Dursan., GESTICAR G., Garage Club C.  
+**- Grupo 2 (Medianos):** Red MundiCars, OCASIONPLUS, Red CRESTANEVADA  
+**- Grupo 3 (Grandes):** INTEGRAL MOTION, FlexCar
 
 ### Modos de Ejecución
 
