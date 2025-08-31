@@ -7,9 +7,9 @@ Descripcion: Sistema automatizado para extraccion de datos de vehiculos
              de vendedores profesionales en Wallapop con Google Sheets
              
 Autor: Carlos Peraza
-Version: 12.5 
+Version: 12.6
 Fecha: Agosto 2025
-Compatibilidad: Python 3.8+
+Compatibilidad: Python 3.10+
 Uso: Motick
 
 ================================================================================
