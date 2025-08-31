@@ -8,7 +8,7 @@
 
 ## Excel de Datos Diario
 
-**Ver datos extraídos:** [Google Sheets Dashboard](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
+[Google Sheets Dashboard](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
 
 </div>
 
