@@ -2,7 +2,7 @@
 
 # 🚗 Wallapop Car Scraper 🚗
 
-**Sistema automatizado de extracción de datos para concesionarios profesionales en Wallapop**
+**Sistema automatizado de extracción de datos para concesionarios en Wallapop**
 
 [![Build](https://img.shields.io/badge/Build-Passing-success)](../../actions)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/downloads/)
@@ -21,7 +21,7 @@
 
 ## 🖥️ Descripción General
 
-Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extrayendo y organizando datos de inventario vehicular de forma automática. Diseñado para escalabilidad y confiabilidad sin intervención manual.
+Este sistema monitorea 18 concesionarios profesionales en Wallapop, extrayendo y organizando datos de inventario de forma automática. Diseñado para escalabilidad y confiabilidad sin intervención manual.
 
 ### Métricas Clave
 
@@ -35,11 +35,10 @@ Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extr
 
 El sistema sigue una arquitectura de flujo automatizado, basada en GitHub Actions y servicios cloud:
 
-
 ### Componentes Técnicos
 
 - **GitHub Actions**  
-  Orquestación y ejecución automática de workflows programados.
+  Ejecución automática de workflows programados.
 
 - **Python 3.11**  
   Motor principal del sistema: extracción, limpieza y transformación de datos.
@@ -98,34 +97,38 @@ Los concesionarios están distribuidos en tres grupos para optimizar la ejecuci�
 El sistema admite tres modos de ejecución, adaptados a distintos contextos operativos:
 
 - **Producción:**  
-  Ejecución programada diariamente a las 06:00 (hora España). Procesa automáticamente todos los concesionarios (más de 18).
+  Ejecución programada diariamente a las 06:00 (hora España). Procesa automáticamente todos los concesionarios (más de 18) en una única ejecución secuencial.
 
 - **Prueba:**  
-  Ejecución manual para testeo. Procesa un único concesionario, por defecto `DURSAN D.`. Ideal para validaciones rápidas.
+  Ejecución manual para testeo. Cuenta con dos variantes:
+  
+  - **Prueba rápida:** procesa únicamente `DURSAN D.`, útil para validar el flujo general de scraping, subida y conexión.
+  - **Prueba de extracción:** procesa tres concesionarios específicos con **formatos de precio distintos**, diseñada para verificar la robustez del sistema frente a variaciones en los datos.
 
-- **Paralelo:**  
-  Ejecuta los grupos `1`, `2` y `3` de forma secuencial mediante un workflow alternativo, optimizando tiempos en ejecuciones grandes.
-
+- **Paralelo (Distribuido en Jobs):**  
+  Utiliza un workflow alternativo con **dos jobs independientes (`job1` y `job2`)** que se ejecutan en paralelo dentro de GitHub Actions.  
+  Cada job procesa distintos grupos de concesionarios, lo que permite reducir significativamente el tiempo total de ejecución.
 
 ## 🔍 Estructura de Datos
 
-| Campo               | Descripción                           |
-|---------------------|---------------------------------------|
-| **Marca**           | Marca del vehículo                   |
-| **Modelo**          | Modelo del vehículo                  |
-| **Vendedor**        | Nombre del vendedor                  |
-| **Año**             | Año de matriculación                 |
-| **KM**              | Kilometraje                          |
-| **Precio al Contado** | Precio sin financiación             |
-| **Precio Financiado** | Precio con financiación             |
-| **Tipo**            | Tipo de vehículo                     |
-| **Nº Plazas**       | Número de plazas                     |
-| **Nº Puertas**      | Número de puertas                    |
-| **Combustible**     | Tipo de combustible                  |
-| **Potencia**        | Potencia en CV                       |
-| **Conducción**      | Manual/Automática                    |
-| **URL**             | Enlace al anuncio en Wallapop        |
-| **Fecha Extracción**| Fecha en que se extrajo la información|
+| 🧾 Campo                 | 📄 Descripción                              |
+|-------------------------|---------------------------------------------|
+| **Marca**               | Marca del vehículo                          |
+| **Modelo**              | Modelo del vehículo                         |
+| **Vendedor**            | Nombre del concesionario                    |
+| **Año**                 | Año de matriculación                        |
+| **KM**                  | Kilometraje                                 |
+| **Precio al Contado**   | Precio del vehículo sin financiación        |
+| **Precio Financiado**   | Precio con financiación                     |
+| **Tipo**                | Tipo de vehículo (SUV, Berlina, etc.)       |
+| **Nº Plazas**           | Número de plazas del vehículo               |
+| **Nº Puertas**          | Número de puertas                           |
+| **Combustible**         | Tipo de combustible (Gasolina, Diésel, etc.)|
+| **Potencia**            | Potencia en caballos (CV)                   |
+| **Conducción**          | Tipo de cambio: manual o automático         |
+| **URL**                 | Enlace al anuncio original en Wallapop      |
+| **Fecha Extracción**    | Fecha y hora en que se extrajo la información |
+
 
 ###  📞 Contacto
 > Para consultas técnicas utilizar sistema **GitHub Issues**
