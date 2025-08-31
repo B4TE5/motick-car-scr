@@ -1,6 +1,6 @@
 """
 ================================================================================
-                    WALLAPOP VEHICULOS - EXTRACTOR MOTICK                    
+                     EXTRACTOR COCHES · WALLAPOP SCRAPER                   
 ================================================================================
 
 Descripcion: Sistema automatizado para extraccion de datos de vehiculos
