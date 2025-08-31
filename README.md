@@ -6,7 +6,7 @@
 
 [![Build](https://img.shields.io/badge/Build-Passing-success)](../../actions) [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/downloads/) [![License](https://img.shields.io/badge/License-Private-red)](LICENSE)
 
-## 📊 Excel de Datos Diario
+## Excel de Datos Diario
 
 **Ver datos extraídos:** [Google Sheets Dashboard](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
 
