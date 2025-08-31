@@ -12,7 +12,7 @@
 
 ## Excel de Datos Diario
 
-🔗 [Google Sheets Link](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
+🔗 [Google Sheets Link](https://docs.google.com/spreadsheets/d/1MueWLJADr7vlLJhRslLi1SYF8wtyhqhDlHEay1JerUE/edit?gid=0#gid=0)
 
 </div>
 
