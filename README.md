@@ -55,10 +55,10 @@ El sistema sigue una arquitectura de flujo automatizado, basada en GitHub Action
 
 ### Requisitos Previos
 
-- Repositorio GitHub con Actions habilitado
-- Proyecto Google Cloud con API de Sheets habilitada
-- Cuenta de servicio con permisos apropiados
-- Google Sheet con permisos de compartición
+- Un repositorio en **GitHub** con **Actions habilitado**
+- Un proyecto en **Google Cloud** con la **API de Google Sheets** activada
+- Una **cuenta de servicio** con permisos suficientes y credenciales JSON
+- Un **Google Sheet compartido** con la cuenta de servicio
 
 ### Configuración
 
@@ -81,23 +81,31 @@ El sistema sigue una arquitectura de flujo automatizado, basada en GitHub Action
    
    Navegar a `Actions → Wallapop Scraper Automation → Run workflow`
 
-## ⚙️ Configuración
+## ⚙️ Configuración del Sistema
 
-### Grupos de Concesionarios
+### Organización de Concesionarios
 
-El sistema procesa concesionarios en grupos organizados para rendimiento óptimo:
+Los concesionarios están distribuidos en tres grupos para optimizar la ejecución y equilibrar la carga:
 
-- **Grupo 1 (Pequeños):** DURSAN D., Beatriz Dursan., GESTICAR G., Garage Club C.  
-- **Grupo 2 (Medianos):** Red MundiCars, OCASIONPLUS, Red CRESTANEVADA  
-- **Grupo 3 (Grandes):** INTEGRAL MOTION, FlexCar
+| Grupo      | Clasificación     | Concesionarios incluidos                                              |
+|------------|-------------------|------------------------------------------------------------------------|
+| **Grupo 1** | Volumen bajo      | DURSAN D., Beatriz D., GESTICAR G., Garage Club C.                    |
+| **Grupo 2** | Volumen medio     | Red MundiCars, OCASIONPLUS, Red CRESTANEVADA                          |
+| **Grupo 3** | Volumen alto      | INTEGRAL MOTION, FlexCar   
 
 ### Modos de Ejecución
 
-| Modo | Activación | Alcance |
-|------|------------|---------|
-| **Producción** | Programación diaria | Todos los 18+ concesionarios |
-| **Prueba** | Activación manual | Un solo concesionario (DURSAN D.) |
-| **Paralelo** | Workflow alternativo | Grupos 1-3 secuencialmente |
+El sistema admite tres modos de ejecución, adaptados a distintos contextos operativos:
+
+- **Producción:**  
+  Ejecución programada diariamente a las 06:00 (hora España). Procesa automáticamente todos los concesionarios (más de 18).
+
+- **Prueba:**  
+  Ejecución manual para testeo. Procesa un único concesionario, por defecto `DURSAN D.`. Ideal para validaciones rápidas.
+
+- **Paralelo:**  
+  Ejecuta los grupos `1`, `2` y `3` de forma secuencial mediante un workflow alternativo, optimizando tiempos en ejecuciones grandes.
+
 
 ## 🔍 Estructura de Datos
 
