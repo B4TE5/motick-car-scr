@@ -4,21 +4,24 @@
 
 **Sistema automatizado de extracción de datos para concesionarios profesionales en Wallapop**
 
-[![Build](https://img.shields.io/badge/Build-Passing-success)](../../actions) [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/downloads/) [![License](https://img.shields.io/badge/License-Private-red)](LICENSE)
+[![Build](https://img.shields.io/badge/Build-Passing-success)](../../actions)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://www.python.org/downloads/)
+[![Selenium](https://img.shields.io/badge/Selenium-WebDriver-43B02A)](https://www.selenium.dev/downloads/)
+[![Google Sheets API](https://img.shields.io/badge/Google-Workspace-4285F4)](https://developers.google.com/workspace/sheets/api/guides/concepts?hl=es-419)
+[![License](https://img.shields.io/badge/License-Private-red)](LICENSE)
 
 ## Excel de Datos Diario
 
-[Google Sheets Link](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
+🔗 [Google Sheets Link](https://docs.google.com/spreadsheets/d/1drZonCFIP5BFuhbUW9cUauDQOWIVpE0V7P2ErpJq6bM/edit?gid=265284675#gid=265284675)
 
 </div>
+
 
 ---
 
 ## 🖥️ Descripción General
 
 Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extrayendo y organizando datos de inventario vehicular de forma automática. Diseñado para escalabilidad y confiabilidad sin intervención manual.
-
-### 📊 Métricas Clave
 
 ### 📊 Métricas Clave
 
