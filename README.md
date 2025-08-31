@@ -18,23 +18,35 @@
 
 Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extrayendo y organizando datos de inventario vehicular de forma automática. Diseñado para escalabilidad y confiabilidad sin intervención manual.
 
-**Métricas Clave:**
-- **5,000+** vehículos procesados diariamente
-- **95%+** tasa de completitud de datos
-- **3 horas** ventana de ejecución
-- **Diario** ejecuciones automáticas a las 06:00 AM (España)
+### 📊 Métricas Clave
 
-## 🏗️ Arquitectura
+### 📊 Métricas Clave
 
-```
-GitHub Actions → Motor Python → Selenium WebDriver → Procesamiento de Datos → Google Sheets
-```
+- **División por hojas:** dos hojas diarias generadas: `SCR.J1` y `SCR.J2`
+- **Vehículos procesados:** casi **5.000** coches por hoja, diariamente
+- **Completitud de datos:** superior al **95%**
+- **Tiempo medio de ejecución:** aproximadamente **5 horas** por job en paralelo
+- **Frecuencia:** ejecución automática diaria a las **06:00** (hora España)
 
-**Componentes Principales:**
-- **Python 3.11** motor de procesamiento
-- **Selenium WebDriver** con Chrome headless
-- **Google Sheets API** para almacenamiento de datos
-- **GitHub Actions** para automatización
+## 🏗️ Arquitectura del Sistema
+
+El sistema sigue una arquitectura de flujo automatizado, basada en GitHub Actions y servicios cloud:
+
+
+### Componentes Técnicos
+
+- **GitHub Actions**  
+  Orquestación y ejecución automática de workflows programados.
+
+- **Python 3.11**  
+  Motor principal del sistema: extracción, limpieza y transformación de datos.
+
+- **Selenium WebDriver (Chrome Headless)**  
+  Navegación automatizada y scraping de páginas de vendedores en Wallapop.
+
+- **Google Sheets API**  
+  Almacenamiento estructurado del inventario diario en hojas compartidas.
+
 
 ## 🚀 Inicio Rápido
 
