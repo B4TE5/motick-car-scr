@@ -104,8 +104,6 @@ El sistema procesa concesionarios en grupos organizados para rendimiento óptimo
 | **URL**             | Enlace al anuncio en Wallapop        |
 | **Fecha Extracción**| Fecha en que se extrajo la información|
 
----
-
 ###  📞 Contacto
 > Para consultas técnicas utilizar sistema **GitHub Issues**
 
