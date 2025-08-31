@@ -111,7 +111,7 @@ El sistema admite tres modos de ejecución, adaptados a distintos contextos oper
 
 ## 🔍 Estructura de Datos
 
-| 🧾 Campo                 | 📄 Descripción                              |
+|  Atributo                 |  Descripción                              |
 |-------------------------|---------------------------------------------|
 | **Marca**               | Marca del vehículo                          |
 | **Modelo**              | Modelo del vehículo                         |
