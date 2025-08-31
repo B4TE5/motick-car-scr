@@ -108,12 +108,12 @@ Tipo, Nº Plazas, Nº Puertas, Combustible, Potencia, Conducción, URL, Fecha Ex
 <div align="center">
 
 **Desarrollado por:** Carlos Peraza  
-**Versión:** 12.3 • **Fecha:** Agosto 2025
+**Versión:** 12.6 • **Fecha:** Agosto 2025
 
 [![motick.com](https://img.shields.io/badge/motick.com-00f1a2?style=for-the-badge&labelColor=2d3748)](https://www.motick.com/)
 
-*Sistema de extracción automatizada diseñado para operaciones comerciales*
+*Sistema de extracción automatizada para operaciones comerciales*
 
-**© 2025 MOTICK.COM - Todos los derechos reservados**
+**© 2025- Todos los derechos reservados**
 
 </div>
