@@ -71,7 +71,7 @@ El sistema sigue una arquitectura de flujo automatizado, basada en GitHub Action
    
    Ir a `Settings → Secrets and Variables → Actions` y añadir:
    
-   | Secret | Descripción |
+   |  Secret|  Descripción|
    |--------|-------------|
    | `GOOGLE_CREDENTIALS_JSON` | JSON completo de la cuenta de servicio |
    | `GOOGLE_SHEET_ID` | ID del Google Sheet destino |
