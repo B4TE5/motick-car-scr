@@ -23,7 +23,7 @@
 
 Este sistema monitorea más de 18 concesionarios profesionales en Wallapop, extrayendo y organizando datos de inventario vehicular de forma automática. Diseñado para escalabilidad y confiabilidad sin intervención manual.
 
-### 📊 Métricas Clave
+### Métricas Clave
 
 - **División por hojas:** dos hojas diarias generadas: `SCR.J1` y `SCR.J2`
 - **Vehículos procesados:** casi **5.000** coches por hoja, diariamente
