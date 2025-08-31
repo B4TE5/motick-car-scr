@@ -96,11 +96,19 @@ class GoogleSheetsUploader:
             return False
     
     def upload_by_seller(self, df):
-        """Crear UNA SOLA hoja por fecha de ejecucion"""
+        """Crear hoja por fecha y job para ejecución paralela"""
         try:
-            # Nombre de hoja basado en fecha actual
+            # Nombre de hoja basado en fecha actual Y VENDOR_GROUP
             today = datetime.now()
-            sheet_name = f"SCR {today.strftime('%d/%m/%y')}"
+            vendor_group = os.getenv('VENDOR_GROUP', 'manual')
+            
+            # Crear nombre único para cada job
+            if vendor_group == 'job1':
+                sheet_name = f"SCR-J1 {today.strftime('%d/%m/%y')}"
+            elif vendor_group == 'job2':
+                sheet_name = f"SCR-J2 {today.strftime('%d/%m/%y')}"
+            else:
+                sheet_name = f"SCR {today.strftime('%d/%m/%y')}"
             
             print(f"\nSUBIENDO: Hoja {sheet_name}")
             
