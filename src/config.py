@@ -57,7 +57,6 @@ SELLERS_GROUP_3 = {
     "MundiCars B.": "https://es.wallapop.com/user/mundicarst-439083033",
     "MundiCars S.": "https://es.wallapop.com/user/mundicarst-443905034",
     "OCASIONPLUS E.": "https://es.wallapop.com/user/ocasionpluse-437961034",
-    "GRUPO O.": "https://es.wallapop.com/user/grupoo-468103033",
     "Flexicar L.": "https://es.wallapop.com/user/flexicar-395335033",
     "INTEGRAL MOTION M.": "https://es.wallapop.com/user/integralm-463115034"
 }
@@ -102,7 +101,6 @@ def get_sellers(test_mode=False, vendor_group=None, test_type="gesticar"):
     elif vendor_group == 'job2':
         # JOB 2: LO QUE NO COMPLETÓ + GRUPO O. (4,455 vehículos, ~5h 30m)
         return {
-            "GRUPO O.": "https://es.wallapop.com/user/grupoo-468103033",
             "Flexicar L.": "https://es.wallapop.com/user/flexicar-395335033",
             "INTEGRAL MOTION M.": "https://es.wallapop.com/user/integralm-463115034"
         }
