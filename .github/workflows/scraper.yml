@@ -2,7 +2,7 @@ name: Wallapop Scraper Automation
 
 on:
   schedule:
-    - cron: '0 13 * * *'  # 6:00 AM España
+    - cron: '0 4 * * *'  # 6:00 AM España
   
   workflow_dispatch:
     inputs:
