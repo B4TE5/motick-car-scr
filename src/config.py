@@ -1,5 +1,20 @@
 """
-Configuracion para Wallapop Scraper Automation
+===============================================================================
+                       MOTICK · WALLAPOP SCRAPER - CONFIG
+===============================================================================
+
+Descripción:
+    Módulo de configuración para la automatización de scraping de 
+    vehículos en Wallapop. Incluye gestión de credenciales, vendedores 
+    de prueba, división en grupos y soporte para ejecución distribuida.
+
+Autor: Carlos Peraza
+Versión: 12.6
+Fecha: Agosto 2025
+Compatibilidad: Python 3.10+
+Uso: Motick
+
+===============================================================================
 """
 
 import os
