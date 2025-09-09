@@ -1,4 +1,4 @@
-name: Test Analisis FORZADO
+name: Test Analisis Historico
 
 on:
   workflow_dispatch:
@@ -10,13 +10,13 @@ on:
         type: choice
         options:
           - test_local
-          - test_simple
-          - debug_completo
+          - analisis_real
+          - mock_data
 
 jobs:
-  test-forzado:
+  test-analisis-rapido:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 10  # Solo 10 minutos para prueba
     
     steps:
     - name: Checkout Repository
@@ -32,104 +32,34 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: Verificar Archivos Existen
-      run: |
-        echo "=== VERIFICANDO ARCHIVOS ==="
-        ls -la src/
-        echo ""
-        echo "¿Existe test_analisis_local.py?"
-        if [ -f "src/test_analisis_local.py" ]; then
-            echo "✓ SI existe"
-            echo "Tamaño: $(wc -l < src/test_analisis_local.py) líneas"
-        else
-            echo "✗ NO existe"
-            exit 1
-        fi
-        
-    - name: Test Simple (si se selecciona)
-      if: ${{ inputs.modo_prueba == 'test_simple' }}
+    - name: Run Test Local (Mock Data)
+      if: ${{ inputs.modo_prueba == 'test_local' || inputs.modo_prueba == 'mock_data' }}
       run: |
         cd src
-        echo "=== EJECUTANDO TEST SIMPLE ==="
-        python -c "
-print('TEST SIMPLE INICIADO')
-import sys
-sys.path.append('.')
-
-try:
-    from test_analisis_local import TestAnalisisLocalV11
-    print('✓ Import exitoso')
-    
-    tester = TestAnalisisLocalV11(usar_mock=True, debug=False)
-    print('✓ Objeto creado')
-    
-    resultado = tester.test_configuracion_v11()
-    print(f'✓ Test configuracion: {resultado}')
-    
-    print('TEST SIMPLE COMPLETADO')
-except Exception as e:
-    print(f'ERROR: {e}')
-    import traceback
-    traceback.print_exc()
-"
+        python test_analisis_local.py --mock-data --debug
         
-    - name: Test Local Mock (si se selecciona)
-      if: ${{ inputs.modo_prueba == 'test_local' }}
+    - name: Run Test Local (Real Data)
+      if: ${{ inputs.modo_prueba == 'analisis_real' }}
+      env:
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
       run: |
         cd src
-        echo "=== INICIANDO TEST LOCAL MOCK ==="
-        echo "Comando: python test_analisis_local.py --mock-data --debug"
-        echo "Directorio actual: $(pwd)"
-        echo "Archivos Python disponibles:"
-        ls -la *.py
-        echo ""
-        echo "=== EJECUTANDO TEST ==="
+        python test_analisis_local.py --debug
         
-        # Ejecutar con manejo de errores explícito
-        if python test_analisis_local.py --mock-data --debug; then
-            echo ""
-            echo "✅ TEST COMPLETADO SIN ERRORES"
-        else
-            exit_code=$?
-            echo ""
-            echo "❌ TEST FALLÓ CON CÓDIGO: $exit_code"
-            echo "Intentando ejecutar con python3..."
-            python3 test_analisis_local.py --mock-data --debug || echo "También falló con python3"
-        fi
-        
-    - name: Debug Completo (si se selecciona)
-      if: ${{ inputs.modo_prueba == 'debug_completo' }}
+    - name: Run Analisis Real (Solo si hay datos del scraper)
+      if: ${{ inputs.modo_prueba == 'analisis_real' }}
+      env:
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        TEST_MODE: true
       run: |
         cd src
-        echo "=== DEBUG COMPLETO ==="
+        python analisis_coches.py
         
-        echo "1. Verificando sintaxis..."
-        python -m py_compile test_analisis_local.py || echo "ERROR sintaxis"
-        
-        echo "2. Probando import..."
-        python -c "import test_analisis_local; print('Import OK')" || echo "ERROR import"
-        
-        echo "3. Ejecutando con output completo..."
-        python test_analisis_local.py --mock-data --debug 2>&1 | tee test_output.log || true
-        
-        echo "4. Mostrando últimas 50 líneas del output..."
-        tail -50 test_output.log || echo "No se pudo leer output"
-        
-        echo "5. Verificando si hay archivos de error..."
-        ls -la *.log 2>/dev/null || echo "No hay logs"
-        
-    - name: Show Final Status
+    - name: Show Results
       if: always()
       run: |
-        echo ""
-        echo "=== ESTADO FINAL ==="
-        echo "Modo ejecutado: ${{ inputs.modo_prueba }}"
-        echo "Estado del job: ${{ job.status }}"
-        echo "Hora completado: $(date)"
-        
-        if [ "${{ inputs.modo_prueba }}" = "test_local" ]; then
-            echo ""
-            echo "📋 RESULTADO TEST LOCAL:"
-            echo "Si ves '✅ TEST COMPLETADO SIN ERRORES' arriba = ÉXITO"
-            echo "Si ves '❌ TEST FALLÓ' = hay un problema específico"
-        fi
+        echo "PRUEBA COMPLETADA"
+        echo "Modo: ${{ inputs.modo_prueba }}"
+        echo "Revisa los logs arriba para verificar funcionamiento"
