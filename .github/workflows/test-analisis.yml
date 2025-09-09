@@ -1,0 +1,65 @@
+name: Test Analisis Historico
+
+on:
+  workflow_dispatch:
+    inputs:
+      modo_prueba:
+        description: 'Tipo de prueba'
+        required: true
+        default: 'test_local'
+        type: choice
+        options:
+          - test_local
+          - analisis_real
+          - mock_data
+
+jobs:
+  test-analisis-rapido:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # Solo 10 minutos para prueba
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run Test Local (Mock Data)
+      if: ${{ inputs.modo_prueba == 'test_local' || inputs.modo_prueba == 'mock_data' }}
+      run: |
+        cd src
+        python test_analisis_local.py --mock-data --debug
+        
+    - name: Run Test Local (Real Data)
+      if: ${{ inputs.modo_prueba == 'analisis_real' }}
+      env:
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+      run: |
+        cd src
+        python test_analisis_local.py --debug
+        
+    - name: Run Analisis Real (Solo si hay datos del scraper)
+      if: ${{ inputs.modo_prueba == 'analisis_real' }}
+      env:
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        TEST_MODE: true
+      run: |
+        cd src
+        python analisis_coches.py
+        
+    - name: Show Results
+      if: always()
+      run: |
+        echo "PRUEBA COMPLETADA"
+        echo "Modo: ${{ inputs.modo_prueba }}"
+        echo "Revisa los logs arriba para verificar funcionamiento"
