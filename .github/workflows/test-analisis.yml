@@ -1,50 +1,135 @@
-name: Listar Hojas Google Sheets
+name: Test Analisis FORZADO
 
 on:
   workflow_dispatch:
+    inputs:
+      modo_prueba:
+        description: 'Tipo de prueba'
+        required: true
+        default: 'test_local'
+        type: choice
+        options:
+          - test_local
+          - test_simple
+          - debug_completo
 
 jobs:
-  listar-hojas:
+  test-forzado:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
         python-version: '3.11'
         
     - name: Install Dependencies
-      run: pip install -r requirements.txt
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
         
-    - name: Listar Hojas Disponibles
-      env:
-        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
-        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+    - name: Verificar Archivos Existen
+      run: |
+        echo "=== VERIFICANDO ARCHIVOS ==="
+        ls -la src/
+        echo ""
+        echo "¿Existe test_analisis_local.py?"
+        if [ -f "src/test_analisis_local.py" ]; then
+            echo "✓ SI existe"
+            echo "Tamaño: $(wc -l < src/test_analisis_local.py) líneas"
+        else
+            echo "✗ NO existe"
+            exit 1
+        fi
+        
+    - name: Test Simple (si se selecciona)
+      if: ${{ inputs.modo_prueba == 'test_simple' }}
       run: |
         cd src
+        echo "=== EJECUTANDO TEST SIMPLE ==="
         python -c "
-import os
-from google_sheets_uploader import GoogleSheetsUploader
+print('TEST SIMPLE INICIADO')
+import sys
+sys.path.append('.')
 
-# Inicializar conexión
-gs_handler = GoogleSheetsUploader(
-    credentials_json_string=os.getenv('GOOGLE_CREDENTIALS_JSON'),
-    sheet_id=os.getenv('GOOGLE_SHEET_ID')
-)
-
-# Listar todas las hojas
-spreadsheet = gs_handler.client.open_by_key(os.getenv('GOOGLE_SHEET_ID'))
-hojas = [ws.title for ws in spreadsheet.worksheets()]
-
-print('=== HOJAS DISPONIBLES ===')
-for hoja in hojas:
-    print(f'  - {hoja}')
-
-print(f'\\nTotal: {len(hojas)} hojas')
-
-# Buscar hojas SCR
-hojas_scr = [h for h in hojas if h.startswith('SCR')]
-print(f'\\n=== HOJAS SCRAPER ===')
-for hoja in hojas_scr:
-    print(f'  - {hoja}')
+try:
+    from test_analisis_local import TestAnalisisLocalV11
+    print('✓ Import exitoso')
+    
+    tester = TestAnalisisLocalV11(usar_mock=True, debug=False)
+    print('✓ Objeto creado')
+    
+    resultado = tester.test_configuracion_v11()
+    print(f'✓ Test configuracion: {resultado}')
+    
+    print('TEST SIMPLE COMPLETADO')
+except Exception as e:
+    print(f'ERROR: {e}')
+    import traceback
+    traceback.print_exc()
 "
+        
+    - name: Test Local Mock (si se selecciona)
+      if: ${{ inputs.modo_prueba == 'test_local' }}
+      run: |
+        cd src
+        echo "=== INICIANDO TEST LOCAL MOCK ==="
+        echo "Comando: python test_analisis_local.py --mock-data --debug"
+        echo "Directorio actual: $(pwd)"
+        echo "Archivos Python disponibles:"
+        ls -la *.py
+        echo ""
+        echo "=== EJECUTANDO TEST ==="
+        
+        # Ejecutar con manejo de errores explícito
+        if python test_analisis_local.py --mock-data --debug; then
+            echo ""
+            echo "✅ TEST COMPLETADO SIN ERRORES"
+        else
+            exit_code=$?
+            echo ""
+            echo "❌ TEST FALLÓ CON CÓDIGO: $exit_code"
+            echo "Intentando ejecutar con python3..."
+            python3 test_analisis_local.py --mock-data --debug || echo "También falló con python3"
+        fi
+        
+    - name: Debug Completo (si se selecciona)
+      if: ${{ inputs.modo_prueba == 'debug_completo' }}
+      run: |
+        cd src
+        echo "=== DEBUG COMPLETO ==="
+        
+        echo "1. Verificando sintaxis..."
+        python -m py_compile test_analisis_local.py || echo "ERROR sintaxis"
+        
+        echo "2. Probando import..."
+        python -c "import test_analisis_local; print('Import OK')" || echo "ERROR import"
+        
+        echo "3. Ejecutando con output completo..."
+        python test_analisis_local.py --mock-data --debug 2>&1 | tee test_output.log || true
+        
+        echo "4. Mostrando últimas 50 líneas del output..."
+        tail -50 test_output.log || echo "No se pudo leer output"
+        
+        echo "5. Verificando si hay archivos de error..."
+        ls -la *.log 2>/dev/null || echo "No hay logs"
+        
+    - name: Show Final Status
+      if: always()
+      run: |
+        echo ""
+        echo "=== ESTADO FINAL ==="
+        echo "Modo ejecutado: ${{ inputs.modo_prueba }}"
+        echo "Estado del job: ${{ job.status }}"
+        echo "Hora completado: $(date)"
+        
+        if [ "${{ inputs.modo_prueba }}" = "test_local" ]; then
+            echo ""
+            echo "📋 RESULTADO TEST LOCAL:"
+            echo "Si ves '✅ TEST COMPLETADO SIN ERRORES' arriba = ÉXITO"
+            echo "Si ves '❌ TEST FALLÓ' = hay un problema específico"
+        fi
