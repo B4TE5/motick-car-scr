@@ -10,10 +10,6 @@
 [![Google Sheets API](https://img.shields.io/badge/Google-Workspace-4285F4)](https://developers.google.com/workspace/sheets/api/guides/concepts?hl=es-419)
 [![License](https://img.shields.io/badge/License-Private-red)](LICENSE)
 
-## Excel de Datos Diario
-
-🔗 [Google Sheets Link](https://docs.google.com/spreadsheets/d/1MueWLJADr7vlLJhRslLi1SYF8wtyhqhDlHEay1JerUE/edit?gid=0#gid=0)
-
 </div>
 
 
