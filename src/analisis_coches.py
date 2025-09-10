@@ -724,8 +724,45 @@ class AnalizadorHistoricoCoches:
             df_sheets = df_sheets.drop(columnas_a_eliminar, axis=1)
             print(f"Columnas internas eliminadas: {columnas_a_eliminar}")
         
-        # ASEGURAR ORDEN CORRECTO ANTES DE GUARDAR
-        df_sheets = self.reordenar_columnas_consistente(df_sheets)
+        # ORDEN FORZADO DEFINITIVO - SIN MARGEN DE ERROR
+        print("APLICANDO ORDEN FORZADO DEFINITIVO...")
+        
+        # Definir orden exacto
+        orden_definitivo = [
+            'ID_Unico_Coche', 'Marca', 'Modelo', 'Vendedor', 'Ano', 'KM',
+            'Tipo', 'Nº Plazas', 'Nº Puertas', 'Combustible', 'Potencia', 'Conducción',
+            'URL', 'Primera_Deteccion', 'Estado', 'Fecha_Venta'
+        ]
+        
+        # Agregar columnas de precios al final (ordenadas cronológicamente)
+        columnas_precios = [col for col in df_sheets.columns if col.startswith('Precio_')]
+        def ordenar_fecha_precio(col_precio):
+            try:
+                fecha_str = col_precio.replace('Precio_', '')
+                fecha_obj = datetime.strptime(fecha_str, "%d/%m/%Y")
+                return fecha_obj
+            except:
+                return datetime.min
+        columnas_precios.sort(key=ordenar_fecha_precio)
+        
+        # Construir orden final
+        orden_final = []
+        for col in orden_definitivo:
+            if col in df_sheets.columns:
+                orden_final.append(col)
+        
+        # Agregar precios al final
+        orden_final.extend(columnas_precios)
+        
+        # FORZAR ESTE ORDEN
+        df_sheets = df_sheets[orden_final]
+        
+        print(f"ORDEN DEFINITIVO APLICADO:")
+        for i, col in enumerate(orden_final, 1):
+            if col.startswith('Precio_'):
+                print(f"   {i:2d}. {col} <-- PRECIO")
+            else:
+                print(f"   {i:2d}. {col}")
         
         return df_sheets
     
