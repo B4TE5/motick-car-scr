@@ -606,6 +606,46 @@ class AnalizadorHistoricoCoches:
             print(f"ERROR critico en procesamiento: {str(e)}")
             raise
     
+    def reordenar_columnas_consistente(self, df):
+        """Reordena las columnas en el orden específico solicitado"""
+        try:
+            # ORDEN ESPECIFICO: Datos del coche -> URL y control -> Precios por fecha
+            columnas_datos_coche = ['ID_Unico_Coche', 'Marca', 'Modelo', 'Vendedor', 'Ano', 'KM', 'Tipo', 'Plazas', 'Puertas', 'Combustible', 'Potencia', 'Conduccion']
+            columnas_url_control = ['URL', 'Primera_Deteccion', 'Estado', 'Fecha_Venta']
+            
+            # Obtener columnas de precios (ordenadas por fecha)
+            columnas_precios = [col for col in df.columns if col.startswith('Precio_')]
+            columnas_precios.sort()  # Ordenar cronológicamente
+            
+            # Construir orden final
+            columnas_ordenadas = []
+            
+            # 1. Añadir columnas de datos del coche
+            for col in columnas_datos_coche:
+                if col in df.columns:
+                    columnas_ordenadas.append(col)
+            
+            # 2. Añadir columnas de URL y control
+            for col in columnas_url_control:
+                if col in df.columns:
+                    columnas_ordenadas.append(col)
+            
+            # 3. Añadir columnas de precios al final
+            columnas_ordenadas.extend(columnas_precios)
+            
+            # 4. Añadir cualquier columna extra que no esté en las listas
+            for col in df.columns:
+                if col not in columnas_ordenadas and not col.endswith('_Internal'):  # Excluir internas
+                    columnas_ordenadas.append(col)
+            
+            # Reordenar DataFrame
+            columnas_existentes = [col for col in columnas_ordenadas if col in df.columns]
+            return df[columnas_existentes]
+            
+        except Exception as e:
+            print(f"ADVERTENCIA: Error reordenando columnas: {str(e)}")
+            return df
+
     def ordenar_dataframe(self, df):
         """Ordena el dataframe por Vendedor y luego por Kilometraje (mayor a menor)"""
         try:
