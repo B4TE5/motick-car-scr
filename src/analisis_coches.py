@@ -1,12 +1,11 @@
 """
-Analizador Historico Coches - Version Google Sheets V1.1 CORREGIDO
+Analizador Historico Coches - Version Google Sheets V1.2 ORDEN COLUMNAS CORREGIDO
 Lee datos del scraper desde Google Sheets y actualiza el historico evolutivo de precios
 
-CORRECCION CRITICA:
-- Formato fecha corregido: SCR-J1 DD/MM/YY (año corto)
-- Mapeo columnas corregido para datos reales del scraper
-- Validaciones ajustadas para estructura real
-- Manejo errores mejorado
+CORRECCIÓN V1.2:
+- Orden columnas corregido: Datos básicos -> Características -> Control -> Precios al FINAL
+- Precios se acumulan cronológicamente al final del dataframe
+- Formato: ID_Unico_Coche Marca Modelo Vendedor Ano KM Tipo Plazas Puertas Combustible Potencia Conduccion URL Primera_Deteccion Estado Fecha_Venta Precio_DD/MM/YYYY...
 """
 
 import sys
@@ -134,13 +133,14 @@ class AnalizadorHistoricoCoches:
     def mostrar_header(self):
         """Muestra el header del sistema"""
         print("="*80)
-        print("ANALIZADOR HISTORICO COCHES V1.1 - VERSION CORREGIDA")
+        print("ANALIZADOR HISTORICO COCHES V1.2 - ORDEN COLUMNAS CORREGIDO")
         print("="*80)
         print(f"Fecha procesamiento: {self.fecha_display}")
         print("Logica: URL como identificador unico principal")
         print("Fuente: Google Sheets (Une SCR-J1 y SCR-J2)")
         print("Destino: Hoja Data_Historico")
         print("Precio: SOLO precio al contado (columnas Precio_FECHA)")
+        print("Orden: Datos básicos -> Características -> Control -> PRECIOS AL FINAL")
         print("Ordenacion: Vendedor -> Kilometraje (mayor a menor)")
         print()
     
@@ -434,23 +434,8 @@ class AnalizadorHistoricoCoches:
         if columnas_existentes_a_eliminar:
             df_historico = df_historico.drop(columnas_existentes_a_eliminar, axis=1)
         
-        # Reordenar columnas
-        columnas_base = ['ID_Unico_Coche', 'Marca', 'Modelo', 'Vendedor', 'Ano', 'KM', 'URL', 'Primera_Deteccion', 'Estado', 'Fecha_Venta']
-        columnas_precio = [col_precio_hoy]
-        
-        columnas_finales = []
-        for col in columnas_base:
-            if col in df_historico.columns:
-                columnas_finales.append(col)
-        
-        columnas_finales.extend(columnas_precio)
-        
-        # Añadir columnas extra que puedan existir
-        for col in df_historico.columns:
-            if col not in columnas_finales:
-                columnas_finales.append(col)
-        
-        df_historico = df_historico[columnas_finales]
+        # CORRECCION V1.2: Reordenar columnas con precios al final
+        df_historico = self.reordenar_columnas_consistente(df_historico)
         
         # Ordenar por vendedor y kilometraje
         df_historico = self.ordenar_dataframe(df_historico)
@@ -566,6 +551,12 @@ class AnalizadorHistoricoCoches:
                         'Fecha_Venta': pd.NA
                     }
                     
+                    # Anadir caracteristicas del coche si existen en el dataframe original
+                    caracteristicas_coche = ['Tipo', 'Plazas', 'Puertas', 'Combustible', 'Potencia', 'Conduccion']
+                    for caracteristica in caracteristicas_coche:
+                        if caracteristica in fila_nueva:
+                            nueva_fila[caracteristica] = str(fila_nueva[caracteristica]) if pd.notna(fila_nueva[caracteristica]) else 'No especificado'
+                    
                     # Inicializar todas las columnas de precios anteriores con NA
                     for col_precio in columnas_precios:
                         nueva_fila[col_precio] = pd.NA
@@ -597,6 +588,9 @@ class AnalizadorHistoricoCoches:
             if 'Ano_Numerico_Internal' not in df_actualizado.columns:
                 df_actualizado['Ano_Numerico_Internal'] = df_actualizado['Ano'].apply(self.limpiar_ano_interno)
             
+            # CORRECCION V1.2: Reordenar columnas con precios al final
+            df_actualizado = self.reordenar_columnas_consistente(df_actualizado)
+            
             # Ordenar resultado final
             df_actualizado = self.ordenar_dataframe(df_actualizado)
             
@@ -607,40 +601,73 @@ class AnalizadorHistoricoCoches:
             raise
     
     def reordenar_columnas_consistente(self, df):
-        """Reordena las columnas en el orden específico solicitado"""
+        """
+        CORRECCION V1.2: Reordena las columnas en el orden específico solicitado
+        Orden: Datos básicos -> Características -> Control -> PRECIOS AL FINAL
+        """
         try:
-            # ORDEN ESPECIFICO: Datos del coche -> URL y control -> Precios por fecha
-            columnas_datos_coche = ['ID_Unico_Coche', 'Marca', 'Modelo', 'Vendedor', 'Ano', 'KM', 'Tipo', 'Plazas', 'Puertas', 'Combustible', 'Potencia', 'Conduccion']
+            print("V1.2: Reordenando columnas con PRECIOS AL FINAL...")
+            
+            # PASO 1: Datos básicos del coche
+            columnas_datos_basicos = ['ID_Unico_Coche', 'Marca', 'Modelo', 'Vendedor', 'Ano', 'KM']
+            
+            # PASO 2: Características del coche  
+            columnas_caracteristicas = ['Tipo', 'Plazas', 'Puertas', 'Combustible', 'Potencia', 'Conduccion']
+            
+            # PASO 3: URL y control
             columnas_url_control = ['URL', 'Primera_Deteccion', 'Estado', 'Fecha_Venta']
             
-            # Obtener columnas de precios (ordenadas por fecha)
+            # PASO 4: Obtener columnas de precios (ordenadas cronológicamente)
             columnas_precios = [col for col in df.columns if col.startswith('Precio_')]
-            columnas_precios.sort()  # Ordenar cronológicamente
             
-            # Construir orden final
+            # Ordenar columnas de precios cronológicamente
+            def ordenar_fecha_precio(col_precio):
+                try:
+                    fecha_str = col_precio.replace('Precio_', '')
+                    fecha_obj = datetime.strptime(fecha_str, "%d/%m/%Y")
+                    return fecha_obj
+                except:
+                    return datetime.min  # Poner al principio si no se puede parsear
+            
+            columnas_precios.sort(key=ordenar_fecha_precio)
+            
+            # CONSTRUIR ORDEN FINAL: Básicos -> Características -> Control -> PRECIOS AL FINAL
             columnas_ordenadas = []
             
-            # 1. Añadir columnas de datos del coche
-            for col in columnas_datos_coche:
+            # 1. Añadir columnas de datos básicos
+            for col in columnas_datos_basicos:
                 if col in df.columns:
                     columnas_ordenadas.append(col)
             
-            # 2. Añadir columnas de URL y control
+            # 2. Añadir columnas de características
+            for col in columnas_caracteristicas:
+                if col in df.columns:
+                    columnas_ordenadas.append(col)
+            
+            # 3. Añadir columnas de URL y control
             for col in columnas_url_control:
                 if col in df.columns:
                     columnas_ordenadas.append(col)
             
-            # 3. Añadir columnas de precios al final
+            # 4. AÑADIR PRECIOS AL FINAL (ordenados cronológicamente)
             columnas_ordenadas.extend(columnas_precios)
             
-            # 4. Añadir cualquier columna extra que no esté en las listas
+            # 5. Añadir cualquier columna extra que no esté en las listas (excepto internas)
             for col in df.columns:
-                if col not in columnas_ordenadas and not col.endswith('_Internal'):  # Excluir internas
+                if col not in columnas_ordenadas and not col.endswith('_Internal'):
                     columnas_ordenadas.append(col)
             
             # Reordenar DataFrame
             columnas_existentes = [col for col in columnas_ordenadas if col in df.columns]
-            return df[columnas_existentes]
+            df_reordenado = df[columnas_existentes]
+            
+            print(f"V1.2: Columnas reordenadas:")
+            print(f"   - Datos básicos: {[col for col in columnas_datos_basicos if col in df.columns]}")
+            print(f"   - Características: {[col for col in columnas_caracteristicas if col in df.columns]}")
+            print(f"   - Control: {[col for col in columnas_url_control if col in df.columns]}")
+            print(f"   - Precios al FINAL: {columnas_precios}")
+            
+            return df_reordenado
             
         except Exception as e:
             print(f"ADVERTENCIA: Error reordenando columnas: {str(e)}")
@@ -697,6 +724,9 @@ class AnalizadorHistoricoCoches:
             df_sheets = df_sheets.drop(columnas_a_eliminar, axis=1)
             print(f"Columnas internas eliminadas: {columnas_a_eliminar}")
         
+        # ASEGURAR ORDEN CORRECTO ANTES DE GUARDAR
+        df_sheets = self.reordenar_columnas_consistente(df_sheets)
+        
         return df_sheets
     
     def guardar_historico_actualizado(self, df_historico):
@@ -704,8 +734,16 @@ class AnalizadorHistoricoCoches:
         try:
             print("Guardando historico actualizado en Google Sheets...")
             
-            # Preparar datos (eliminar columnas internas)
+            # Preparar datos (eliminar columnas internas y reordenar)
             df_sheets = self.preparar_dataframe_para_sheets(df_historico)
+            
+            # Debug: Mostrar orden de columnas final
+            print(f"ORDEN FINAL DE COLUMNAS:")
+            for i, col in enumerate(df_sheets.columns, 1):
+                if col.startswith('Precio_'):
+                    print(f"   {i:2d}. {col} <-- PRECIO")
+                else:
+                    print(f"   {i:2d}. {col}")
             
             # Abrir spreadsheet
             spreadsheet = self.gs_handler.client.open_by_key(self.sheet_id)
@@ -733,6 +771,7 @@ class AnalizadorHistoricoCoches:
             
             print(f"EXITO: Historico guardado con {len(df_sheets)} coches")
             print(f"Columnas precio: {len([col for col in headers if col.startswith('Precio_')])}")
+            print(f"V1.2: PRECIOS AL FINAL - Orden corregido")
             print(f"URL: https://docs.google.com/spreadsheets/d/{self.sheet_id}")
             
             return True
@@ -747,7 +786,7 @@ class AnalizadorHistoricoCoches:
         self.stats['tiempo_ejecucion'] = tiempo_total
         
         print(f"\n{'='*80}")
-        print("PROCESAMIENTO COMPLETADO - ANALISIS HISTORICO COCHES V1.1 CORREGIDO")
+        print("PROCESAMIENTO COMPLETADO - ANALISIS HISTORICO COCHES V1.2 ORDEN CORREGIDO")
         print("="*80)
         print(f"Fecha procesada: {self.fecha_display}")
         print(f"Coches en scraper: {self.stats['total_archivo_nuevo']:,}")
@@ -769,14 +808,14 @@ class AnalizadorHistoricoCoches:
             print(f"Se produjeron {self.stats['errores']} errores durante el procesamiento")
         
         print(f"\nNueva columna: Precio_{self.fecha_display}")
-        print("CORRECCION V1.1:")
-        print("  - Formato fecha corregido (DD/MM/YY)")
-        print("  - Mapeo columnas ajustado al scraper real")
-        print("  - SOLO precio al contado (columnas Precio_FECHA)")
-        print("  - SIN columnas numericas auxiliares en Google Sheets")
-        print("  - SIN precio financiado")
-        print("  - Precios guardados TODOS los dias de extraccion")
-        print("  - Ordenacion: Vendedor -> Kilometraje (mayor a menor)")
+        print("CORRECCION V1.2 - ORDEN COLUMNAS:")
+        print("   Datos básicos: ID_Unico_Coche Marca Modelo Vendedor Ano KM")
+        print("   Características: Tipo Plazas Puertas Combustible Potencia Conduccion") 
+        print("   Control: URL Primera_Deteccion Estado Fecha_Venta")
+        print("   PRECIOS AL FINAL: Precio_DD/MM/YYYY (cronológico)")
+        print("   SIN columnas numericas auxiliares en Google Sheets")
+        print("   SIN precio financiado")
+        print("   Ordenacion: Vendedor -> Kilometraje (mayor a menor)")
     
     def ejecutar(self):
         """Funcion principal que ejecuta todo el proceso"""
@@ -825,33 +864,36 @@ class AnalizadorHistoricoCoches:
 
 def main():
     """Funcion principal del analizador"""
-    print("Iniciando Analizador Historico COCHES V1.1 CORREGIDO...")
-    print("CORRECION CRITICA:")
-    print("   - Formato fecha corregido: SCR-J1 DD/MM/YY (año corto)")
-    print("   - Lee datos del scraper desde Google Sheets (SCR-J1 y SCR-J2)")
-    print("   - Unifica ambos jobs en un solo dataset")
-    print("   - SOLO rastrea precio al contado (columnas Precio_FECHA)")
-    print("   - NO incluye precio financiado")
-    print("   - NO guarda columnas numericas auxiliares en Google Sheets")
-    print("   - USA URL como identificador unico")
-    print("   - Detecta ventas cuando coches desaparecen")
-    print("   - Ordena por Vendedor y Kilometraje (mayor a menor)")
-    print("   - Guarda precios TODOS los dias (suban o bajen)")
+    print("Iniciando Analizador Historico COCHES V1.2 ORDEN COLUMNAS CORREGIDO...")
+    print("CORRECCION V1.2:")
+    print("    PRECIOS AL FINAL: Las columnas de precios van al final del dataframe")
+    print("    Orden específico: Datos básicos -> Características -> Control -> Precios")
+    print("    Formato fecha corregido: SCR-J1 DD/MM/YY (año corto)")
+    print("    Lee datos del scraper desde Google Sheets (SCR-J1 y SCR-J2)")
+    print("    Unifica ambos jobs en un solo dataset")
+    print("    SOLO rastrea precio al contado (columnas Precio_FECHA)")
+    print("    NO incluye precio financiado")
+    print("    NO guarda columnas numericas auxiliares en Google Sheets")
+    print("    USA URL como identificador unico")
+    print("    Detecta ventas cuando coches desaparecen")
+    print("    Ordena por Vendedor y Kilometraje (mayor a menor)")
+    print("    Guarda precios TODOS los dias (suban o bajen)")
     print()
     
     analizador = AnalizadorHistoricoCoches()
     exito = analizador.ejecutar()
     
     if exito:
-        print("\nPROCESO COMPLETADO EXITOSAMENTE V1.1 CORREGIDO")
+        print("\nPROCESO COMPLETADO EXITOSAMENTE V1.2 ORDEN CORREGIDO")
         print("FORMATO DEL HISTORICO MODIFICADO:")
-        print("   - Columnas basicas: Marca, Modelo, Vendedor, Ano, KM, URL, etc.")
-        print("   - Columnas de control: Primera_Deteccion, Estado, Fecha_Venta")
-        print("   - Columnas por fecha: Precio_DD/MM/YYYY (SOLO CONTADO)")
-        print("   - SIN columnas numericas auxiliares en Google Sheets")
-        print("   - ORDENACION: Activos arriba (Vendedor->KM desc), vendidos abajo")
-        print("   - IDENTIFICACION: URL como clave unica principal")
-        print("   - FORMATO FECHA CORREGIDO: DD/MM/YY (coincide con scraper)")
+        print("    Columnas básicas: ID_Unico_Coche, Marca, Modelo, Vendedor, Ano, KM")
+        print("    Columnas características: Tipo, Plazas, Puertas, Combustible, Potencia, Conduccion")
+        print("    Columnas de control: URL, Primera_Deteccion, Estado, Fecha_Venta")
+        print("    Columnas por fecha: Precio_DD/MM/YYYY (SOLO CONTADO) AL FINAL")
+        print("    SIN columnas numericas auxiliares en Google Sheets")
+        print("    ORDENACION: Activos arriba (Vendedor->KM desc), vendidos abajo")
+        print("    IDENTIFICACION: URL como clave unica principal")
+        print("    PRECIOS CRONOLOGICOS: Se acumulan al final en orden temporal")
         
         return True
     else:
