@@ -1,12 +1,12 @@
 """
-Analizador Historico Coches - Version Google Sheets V1.1 MODIFICADO
+Analizador Historico Coches - Version Google Sheets V1.1 CORREGIDO
 Lee datos del scraper desde Google Sheets y actualiza el historico evolutivo de precios
 
-MODIFICACIONES V1.1:
-- SOLO precio al contado (renombrado a Precio_FECHA)
-- NO incluye columnas numericas auxiliares en Google Sheets
-- NO incluye precio financiado
-- Guarda precios TODOS los dias de extraccion
+CORRECCION CRITICA:
+- Formato fecha corregido: SCR-J1 DD/MM/YY (año corto)
+- Mapeo columnas corregido para datos reales del scraper
+- Validaciones ajustadas para estructura real
+- Manejo errores mejorado
 """
 
 import sys
@@ -113,8 +113,8 @@ class AnalizadorHistoricoCoches:
     def extraer_fecha_de_datos(self, df_nuevo):
         """Extrae la fecha de los datos del scraper"""
         try:
-            if 'Fecha Extraccion' in df_nuevo.columns:
-                fecha_str = df_nuevo['Fecha Extraccion'].iloc[0]
+            if 'Fecha_Extraccion' in df_nuevo.columns:
+                fecha_str = df_nuevo['Fecha_Extraccion'].iloc[0]
                 if isinstance(fecha_str, str) and '/' in fecha_str:
                     fecha_parte = fecha_str.split(' ')[0]  # Quitar hora si existe
                     fecha_obj = datetime.strptime(fecha_parte, "%d/%m/%Y")
@@ -134,7 +134,7 @@ class AnalizadorHistoricoCoches:
     def mostrar_header(self):
         """Muestra el header del sistema"""
         print("="*80)
-        print("ANALIZADOR HISTORICO COCHES V1.1 - VERSION MODIFICADA")
+        print("ANALIZADOR HISTORICO COCHES V1.1 - VERSION CORREGIDA")
         print("="*80)
         print(f"Fecha procesamiento: {self.fecha_display}")
         print("Logica: URL como identificador unico principal")
@@ -145,22 +145,27 @@ class AnalizadorHistoricoCoches:
         print()
     
     def leer_datos_scraper_unificados(self):
-        """Lee y unifica datos de ambos jobs del scraper"""
+        """Lee y unifica datos de ambos jobs del scraper - CORREGIDO"""
         try:
             print("Leyendo datos de jobs del scraper...")
             
-            # Obtener fecha de hoy para buscar las hojas
+            # CORRECCION CRITICA: Usar formato de fecha correcto
             fecha_hoy = datetime.now()
-            fecha_str_hoy = fecha_hoy.strftime("%d/%m/%Y")
+            fecha_str_corta = fecha_hoy.strftime("%d/%m/%y")  # FORMATO CORTO: 10/09/25
             
-            # Nombres de las hojas que buscaremos
-            sheet_j1 = f"SCR-J1 {fecha_str_hoy}"
-            sheet_j2 = f"SCR-J2 {fecha_str_hoy}"
+            # Nombres de las hojas que buscaremos (FORMATO REAL DEL SCRAPER)
+            sheet_j1 = f"SCR-J1 {fecha_str_corta}"
+            sheet_j2 = f"SCR-J2 {fecha_str_corta}"
             
             print(f"Buscando hojas: {sheet_j1} y {sheet_j2}")
             
             # Abrir spreadsheet
             spreadsheet = self.gs_handler.client.open_by_key(self.sheet_id)
+            
+            # Listar todas las hojas para debug
+            todas_las_hojas = [ws.title for ws in spreadsheet.worksheets()]
+            hojas_scr = [h for h in todas_las_hojas if h.startswith('SCR')]
+            print(f"Hojas SCR disponibles: {hojas_scr}")
             
             # Intentar leer ambas hojas
             df_j1 = None
@@ -198,6 +203,9 @@ class AnalizadorHistoricoCoches:
             df_unificado = pd.concat(dfs_a_unir, ignore_index=True)
             print(f"DATOS UNIFICADOS: {len(df_unificado)} coches totales")
             
+            # Debug: mostrar columnas encontradas
+            print(f"Columnas encontradas: {list(df_unificado.columns)}")
+            
             # Validar estructura
             df_unificado = self.validar_estructura_archivo(df_unificado)
             
@@ -221,16 +229,23 @@ class AnalizadorHistoricoCoches:
             raise
     
     def validar_estructura_archivo(self, df):
-        """Valida que el archivo tenga la estructura esperada"""
+        """Valida que el archivo tenga la estructura esperada - CORREGIDO"""
         print(f"Validando estructura de datos...")
         
-        # Mapeo de columnas posibles
+        # MAPEO CORREGIDO: Columnas reales del scraper
         mapeo_columnas = {
             'Precio al Contado': 'Precio_Contado',
             'Precio Financiado': 'Precio_Financiado', 
             'Fecha Extraccion': 'Fecha_Extraccion',
             'AÃ±o': 'Ano',
-            'Año': 'Ano'
+            'Año': 'Ano',
+            'Aï¿½o': 'Ano',  # Codificacion rara
+            'Aï¿½ï¿½o': 'Ano',  # Codificacion rara
+            'NÂº Plazas': 'Plazas',
+            'NÂº Puertas': 'Puertas',
+            'ConducciÃ³n': 'Conduccion',
+            'ConducciÃÂ³n': 'Conduccion',
+            'Potencia': 'Potencia'
         }
         
         df = df.rename(columns=mapeo_columnas)
@@ -240,6 +255,7 @@ class AnalizadorHistoricoCoches:
         columnas_faltantes = [col for col in columnas_minimas if col not in df.columns]
         
         if columnas_faltantes:
+            print(f"COLUMNAS DISPONIBLES: {list(df.columns)}")
             raise ValueError(f"Columnas criticas faltantes: {columnas_faltantes}")
         
         # Agregar columnas faltantes con valores por defecto
@@ -260,6 +276,7 @@ class AnalizadorHistoricoCoches:
             print(f"ADVERTENCIA: {urls_vacias} coches con URL vacia seran ignoradas")
             df = df[df['URL'].notna()]
             df = df[df['URL'] != 'No especificado']
+            df = df[df['URL'] != '']
         
         return df
     
@@ -360,7 +377,7 @@ class AnalizadorHistoricoCoches:
                 return df_historico
                 
             except Exception as e:
-                if "not found" in str(e).lower():
+                if "not found" in str(e).lower() or "worksheet not found" in str(e).lower():
                     print("Hoja Data_Historico no existe - sera creada")
                     return None
                 else:
@@ -690,7 +707,7 @@ class AnalizadorHistoricoCoches:
         self.stats['tiempo_ejecucion'] = tiempo_total
         
         print(f"\n{'='*80}")
-        print("PROCESAMIENTO COMPLETADO - ANALISIS HISTORICO COCHES V1.1")
+        print("PROCESAMIENTO COMPLETADO - ANALISIS HISTORICO COCHES V1.1 CORREGIDO")
         print("="*80)
         print(f"Fecha procesada: {self.fecha_display}")
         print(f"Coches en scraper: {self.stats['total_archivo_nuevo']:,}")
@@ -712,7 +729,9 @@ class AnalizadorHistoricoCoches:
             print(f"Se produjeron {self.stats['errores']} errores durante el procesamiento")
         
         print(f"\nNueva columna: Precio_{self.fecha_display}")
-        print("MODIFICACIONES V1.1:")
+        print("CORRECCION V1.1:")
+        print("  - Formato fecha corregido (DD/MM/YY)")
+        print("  - Mapeo columnas ajustado al scraper real")
         print("  - SOLO precio al contado (columnas Precio_FECHA)")
         print("  - SIN columnas numericas auxiliares en Google Sheets")
         print("  - SIN precio financiado")
@@ -766,8 +785,9 @@ class AnalizadorHistoricoCoches:
 
 def main():
     """Funcion principal del analizador"""
-    print("Iniciando Analizador Historico COCHES V1.1 MODIFICADO...")
-    print("FUNCIONALIDADES MODIFICADAS:")
+    print("Iniciando Analizador Historico COCHES V1.1 CORREGIDO...")
+    print("CORRECION CRITICA:")
+    print("   - Formato fecha corregido: SCR-J1 DD/MM/YY (año corto)")
     print("   - Lee datos del scraper desde Google Sheets (SCR-J1 y SCR-J2)")
     print("   - Unifica ambos jobs en un solo dataset")
     print("   - SOLO rastrea precio al contado (columnas Precio_FECHA)")
@@ -783,7 +803,7 @@ def main():
     exito = analizador.ejecutar()
     
     if exito:
-        print("\nPROCESO COMPLETADO EXITOSAMENTE V1.1")
+        print("\nPROCESO COMPLETADO EXITOSAMENTE V1.1 CORREGIDO")
         print("FORMATO DEL HISTORICO MODIFICADO:")
         print("   - Columnas basicas: Marca, Modelo, Vendedor, Ano, KM, URL, etc.")
         print("   - Columnas de control: Primera_Deteccion, Estado, Fecha_Venta")
@@ -791,6 +811,7 @@ def main():
         print("   - SIN columnas numericas auxiliares en Google Sheets")
         print("   - ORDENACION: Activos arriba (Vendedor->KM desc), vendidos abajo")
         print("   - IDENTIFICACION: URL como clave unica principal")
+        print("   - FORMATO FECHA CORREGIDO: DD/MM/YY (coincide con scraper)")
         
         return True
     else:
