@@ -1,0 +1,216 @@
+name: Analisis Historico Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      modo_ejecucion:
+        description: 'Tipo de ejecución'
+        required: true
+        default: 'analisis_ultimo_scraper'
+        type: choice
+        options:
+          - analisis_ultimo_scraper
+          - analisis_fecha_especifica
+          - solo_verificar_datos
+      fecha_especifica:
+        description: 'Fecha específica (DD/MM/YY) - solo si seleccionas fecha específica'
+        required: false
+        default: ''
+        type: string
+      debug_mode:
+        description: 'Modo debug (más información)'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  analisis-historico:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15  # Suficiente para análisis sin scraping
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Debug - Mostrar configuración
+      run: |
+        echo "=== CONFIGURACIÓN DE EJECUCIÓN ==="
+        echo "Modo: ${{ inputs.modo_ejecucion }}"
+        echo "Fecha específica: ${{ inputs.fecha_especifica }}"
+        echo "Debug mode: ${{ inputs.debug_mode }}"
+        echo "Fecha actual: $(date)"
+        echo "==============================="
+        
+    - name: Verificar datos disponibles (si se selecciona)
+      if: ${{ inputs.modo_ejecucion == 'solo_verificar_datos' }}
+      env:
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+      run: |
+        cd src
+        python -c "
+import os
+from google_sheets_uploader import GoogleSheetsUploader
+from datetime import datetime
+
+print('=== VERIFICANDO DATOS DISPONIBLES ===')
+
+# Conectar a Google Sheets
+gs_handler = GoogleSheetsUploader(
+    credentials_json_string=os.getenv('GOOGLE_CREDENTIALS_JSON'),
+    sheet_id=os.getenv('GOOGLE_SHEET_ID')
+)
+
+spreadsheet = gs_handler.client.open_by_key(os.getenv('GOOGLE_SHEET_ID'))
+hojas = [ws.title for ws in spreadsheet.worksheets()]
+
+print(f'Total hojas: {len(hojas)}')
+print()
+
+# Buscar hojas SCR
+hojas_scr = [h for h in hojas if h.startswith('SCR')]
+print(f'=== HOJAS SCRAPER DISPONIBLES ({len(hojas_scr)}) ===')
+for hoja in sorted(hojas_scr):
+    try:
+        ws = spreadsheet.worksheet(hoja)
+        filas = len(ws.get_all_values())
+        print(f'  {hoja}: {filas-1} coches (aprox)')
+    except:
+        print(f'  {hoja}: Error leyendo')
+
+print()
+
+# Buscar hoja histórica
+if 'Data_Historico' in hojas:
+    try:
+        ws_hist = spreadsheet.worksheet('Data_Historico')
+        filas_hist = len(ws_hist.get_all_values())
+        print(f'=== HISTÓRICO EXISTENTE ===')
+        print(f'Data_Historico: {filas_hist-1} coches')
+    except:
+        print('Data_Historico: Error leyendo')
+else:
+    print('=== HISTÓRICO ===')
+    print('Data_Historico: NO EXISTE (se creará en primera ejecución)')
+
+print()
+print('=== RECOMENDACIÓN ===')
+fecha_hoy = datetime.now().strftime('%d/%m/%y')
+hoja_j1_hoy = f'SCR-J1 {fecha_hoy}'
+hoja_j2_hoy = f'SCR-J2 {fecha_hoy}'
+
+if hoja_j1_hoy in hojas_scr or hoja_j2_hoy in hojas_scr:
+    print(f'✓ Datos de hoy ({fecha_hoy}) disponibles')
+    print('  Puedes ejecutar: analisis_ultimo_scraper')
+else:
+    print(f'⚠ Datos de hoy ({fecha_hoy}) NO disponibles')
+    if hojas_scr:
+        ultima_fecha = max([h.split(' ')[1] for h in hojas_scr if ' ' in h])
+        print(f'  Última fecha disponible: {ultima_fecha}')
+        print(f'  Puedes ejecutar: analisis_fecha_especifica con fecha {ultima_fecha}')
+    else:
+        print('  No hay datos de scraper disponibles')
+"
+        
+    - name: Ejecutar análisis con último scraper
+      if: ${{ inputs.modo_ejecucion == 'analisis_ultimo_scraper' }}
+      env:
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        DEBUG_MODE: ${{ inputs.debug_mode }}
+      run: |
+        cd src
+        echo "=== EJECUTANDO ANÁLISIS HISTÓRICO ==="
+        echo "Buscando datos del último scraper disponible..."
+        echo ""
+        
+        if python analisis_coches.py; then
+            echo ""
+            echo "✅ ANÁLISIS COMPLETADO EXITOSAMENTE"
+            echo "Revisa Google Sheets para ver la hoja Data_Historico actualizada"
+        else
+            echo ""
+            echo "❌ ANÁLISIS FALLÓ"
+            echo "Revisa los logs arriba para identificar el problema"
+            exit 1
+        fi
+        
+    - name: Ejecutar análisis con fecha específica
+      if: ${{ inputs.modo_ejecucion == 'analisis_fecha_especifica' && inputs.fecha_especifica != '' }}
+      env:
+        GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+        DEBUG_MODE: ${{ inputs.debug_mode }}
+        FECHA_ESPECIFICA: ${{ inputs.fecha_especifica }}
+      run: |
+        cd src
+        echo "=== EJECUTANDO ANÁLISIS CON FECHA ESPECÍFICA ==="
+        echo "Fecha solicitada: ${{ inputs.fecha_especifica }}"
+        echo ""
+        
+        # Modificar temporalmente el archivo para usar fecha específica
+        python -c "
+import sys
+import re
+
+# Leer archivo original
+with open('analisis_coches.py', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# Reemplazar la línea de fecha
+fecha_especifica = '${{ inputs.fecha_especifica }}'
+print(f'Modificando fecha a: {fecha_especifica}')
+
+# Buscar y reemplazar la línea específica
+pattern = r'fecha_str_hoy = fecha_hoy\.strftime\(\"%d/%m/%y\"\)'
+replacement = f'fecha_str_hoy = \"{fecha_especifica}\"'
+
+content_modificado = re.sub(pattern, replacement, content)
+
+# Guardar archivo modificado
+with open('analisis_coches_temp.py', 'w', encoding='utf-8') as f:
+    f.write(content_modificado)
+
+print('Archivo modificado guardado como analisis_coches_temp.py')
+"
+        
+        echo "Ejecutando análisis con fecha específica..."
+        if python analisis_coches_temp.py; then
+            echo ""
+            echo "✅ ANÁLISIS CON FECHA ESPECÍFICA COMPLETADO"
+            echo "Fecha procesada: ${{ inputs.fecha_especifica }}"
+        else
+            echo ""
+            echo "❌ ANÁLISIS CON FECHA ESPECÍFICA FALLÓ"
+            exit 1
+        fi
+        
+    - name: Mostrar resumen final
+      if: always()
+      run: |
+        echo ""
+        echo "=== RESUMEN EJECUCIÓN ==="
+        echo "Modo ejecutado: ${{ inputs.modo_ejecucion }}"
+        echo "Estado job: ${{ job.status }}"
+        echo "Timestamp: $(date)"
+        
+        if [ "${{ inputs.modo_ejecucion }}" != "solo_verificar_datos" ]; then
+            echo ""
+            echo "=== PRÓXIMOS PASOS ==="
+            echo "1. Revisa la hoja 'Data_Historico' en Google Sheets"
+            echo "2. Verifica que las columnas sean: Precio_DD/MM/YYYY"
+            echo "3. Confirma el ordenamiento: Vendedor -> KM (mayor a menor)"
+            echo "4. Comprueba que se crearon/actualizaron los datos correctamente"
+            echo ""
+            echo "URL Google Sheets: https://docs.google.com/spreadsheets/d/${{ secrets.GOOGLE_SHEET_ID }}"
+        fi
