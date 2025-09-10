@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚗 Wallapop Car Scraper 🚗
+# 🚗 WALLAPOP CAR SCRAPER 🚗
 
 **Sistema automatizado de extracción de datos para concesionarios en Wallapop**
 
