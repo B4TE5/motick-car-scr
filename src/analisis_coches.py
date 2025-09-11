@@ -1,11 +1,12 @@
 """
-Analizador Historico Coches - Version Google Sheets V1.2 ORDEN COLUMNAS CORREGIDO
+Analizador Historico Coches - Version Google Sheets V1.3 ERROR CORREGIDO
 Lee datos del scraper desde Google Sheets y actualiza el historico evolutivo de precios
 
-CORRECCIÓN V1.2:
-- Orden columnas corregido: Datos básicos -> Características -> Control -> Precios al FINAL
-- Precios se acumulan cronológicamente al final del dataframe
-- Formato: ID_Unico_Coche Marca Modelo Vendedor Ano KM Tipo Plazas Puertas Combustible Potencia Conduccion URL Primera_Deteccion Estado Fecha_Venta Precio_DD/MM/YYYY...
+CORRECCIÓN V1.3:
+- Regeneración de columnas internas al leer histórico existente
+- Limpieza exhaustiva de valores problemáticos para Google Sheets
+- Manejo correcto de tipos de datos mixtos (histórico + nuevos datos)
+- Fix para error "Out of range float values are not JSON compliant"
 """
 
 import sys
@@ -133,7 +134,7 @@ class AnalizadorHistoricoCoches:
     def mostrar_header(self):
         """Muestra el header del sistema"""
         print("="*80)
-        print("ANALIZADOR HISTORICO COCHES V1.2 - ORDEN COLUMNAS CORREGIDO")
+        print("ANALIZADOR HISTORICO COCHES V1.3 - ERROR JSON CORREGIDO")
         print("="*80)
         print(f"Fecha procesamiento: {self.fecha_display}")
         print("Logica: URL como identificador unico principal")
@@ -141,19 +142,19 @@ class AnalizadorHistoricoCoches:
         print("Destino: Hoja Data_Historico")
         print("Precio: SOLO precio al contado (columnas Precio_FECHA)")
         print("Orden: Datos básicos -> Características -> Control -> PRECIOS AL FINAL")
+        print("CORRECCION V1.3: Fix error 'Out of range float values'")
         print("Ordenacion: Vendedor -> Kilometraje (mayor a menor)")
         print()
     
     def leer_datos_scraper_unificados(self):
-        """Lee y unifica datos de ambos jobs del scraper - CORREGIDO"""
+        """Lee y unifica datos de ambos jobs del scraper"""
         try:
             print("Leyendo datos de jobs del scraper...")
             
-            # CORRECCION CRITICA: Usar formato de fecha correcto
+            # Usar fecha actual para buscar hojas
             fecha_hoy = datetime.now()
-            fecha_str_corta = fecha_hoy.strftime("%d/%m/%y")  # FORMATO CORTO: 10/09/25
+            fecha_str_corta = fecha_hoy.strftime("%d/%m/%y")
             
-            # Nombres de las hojas que buscaremos (FORMATO REAL DEL SCRAPER)
             sheet_j1 = f"SCR-J1 {fecha_str_corta}"
             sheet_j2 = f"SCR-J2 {fecha_str_corta}"
             
@@ -229,26 +230,23 @@ class AnalizadorHistoricoCoches:
             raise
     
     def validar_estructura_archivo(self, df):
-        """Valida que el archivo tenga la estructura esperada - CORREGIDO"""
-        print(f"Validando estructura de datos...")
+        """Valida y transforma columnas del scraper al formato del histórico"""
+        print(f"Validando y transformando columnas del scraper...")
         
-        # MAPEO CORREGIDO: Columnas reales del scraper
+        # TRANSFORMACIÓN COMPLETA: Scraper → Histórico
         mapeo_columnas = {
-            'Precio al Contado': 'Precio_Contado',
-            'Precio Financiado': 'Precio_Financiado', 
-            'Fecha Extraccion': 'Fecha_Extraccion',
-            'AÃ±o': 'Ano',
-            'Año': 'Ano',
-            'Aï¿½o': 'Ano',  # Codificacion rara
-            'Aï¿½ï¿½o': 'Ano',  # Codificacion rara
-            'NÂº Plazas': 'Plazas',
-            'NÂº Puertas': 'Puertas',
-            'ConducciÃ³n': 'Conduccion',
-            'ConducciÃÂ³n': 'Conduccion',
-            'Potencia': 'Potencia'
+            # Transformaciones necesarias
+            'Precio al Contado': 'Precio_Contado',      # Para procesamiento interno
+            'Año': 'Ano',                               # Año → Ano
+            'Nº Plazas': 'Plazas',                      # Nº Plazas → Plazas  
+            'Nº Puertas': 'Puertas',                    # Nº Puertas → Puertas
+            'Conducción': 'Conduccion',                 # Conducción → Conduccion (sin acento)
+            'Fecha Extracción': 'Fecha_Extraccion'      # Para eliminar después
         }
         
+        print(f"Columnas originales: {list(df.columns)}")
         df = df.rename(columns=mapeo_columnas)
+        print(f"Columnas transformadas: {list(df.columns)}")
         
         # Columnas criticas
         columnas_minimas = ['Marca', 'Modelo', 'Vendedor', 'URL']
@@ -344,7 +342,7 @@ class AnalizadorHistoricoCoches:
         return None
     
     def leer_historico_existente(self):
-        """Lee el historico existente desde Google Sheets"""
+        """Lee el historico existente desde Google Sheets - V1.3 CORREGIDO"""
         try:
             print("Intentando leer historico existente...")
             
@@ -366,14 +364,26 @@ class AnalizadorHistoricoCoches:
                 if 'URL' not in df_historico.columns:
                     raise Exception("Columna URL faltante en historico")
                 
-                # Crear columnas numericas internas si no existen (para ordenamiento)
-                if 'KM_Numerico_Internal' not in df_historico.columns:
-                    df_historico['KM_Numerico_Internal'] = df_historico.get('KM', 'No especificado').apply(self.limpiar_km_interno)
+                # CORRECCION V1.3: REGENERAR columnas internas para ordenamiento
+                print("V1.3: Regenerando columnas numericas internas...")
                 
-                if 'Ano_Numerico_Internal' not in df_historico.columns:
-                    df_historico['Ano_Numerico_Internal'] = df_historico.get('Ano', 'No especificado').apply(self.limpiar_ano_interno)
+                # Regenerar KM_Numerico_Internal
+                if 'KM' in df_historico.columns:
+                    df_historico['KM_Numerico_Internal'] = df_historico['KM'].apply(self.limpiar_km_interno_seguro)
+                else:
+                    df_historico['KM_Numerico_Internal'] = 0
+                
+                # Regenerar Ano_Numerico_Internal
+                if 'Ano' in df_historico.columns:
+                    df_historico['Ano_Numerico_Internal'] = df_historico['Ano'].apply(self.limpiar_ano_interno_seguro)
+                else:
+                    df_historico['Ano_Numerico_Internal'] = 0
+                
+                # LIMPIEZA PROACTIVA DE VALORES PROBLEMÁTICOS
+                df_historico = self.limpiar_valores_problematicos_lectura(df_historico)
                 
                 self.stats['total_historico'] = len(df_historico)
+                print(f"V1.3: Historico regenerado con columnas internas")
                 return df_historico
                 
             except Exception as e:
@@ -387,25 +397,75 @@ class AnalizadorHistoricoCoches:
             print(f"ERROR leyendo historico: {str(e)}")
             raise
     
+    def limpiar_valores_problematicos_lectura(self, df):
+        """V1.3: Limpia valores problemáticos al leer el histórico"""
+        try:
+            print("V1.3: Limpiando valores problemáticos del histórico...")
+            
+            # Reemplazar strings problemáticos
+            df = df.replace(['nan', 'NaN', 'None', 'null', ''], np.nan)
+            
+            # Limpiar infinitos y valores extremos
+            for column in df.columns:
+                if df[column].dtype in ['float64', 'int64', 'float32', 'int32']:
+                    # Reemplazar infinitos
+                    df[column] = df[column].replace([np.inf, -np.inf], np.nan)
+                    # Rellenar NaN con 0
+                    df[column] = df[column].fillna(0)
+                    # Limitar valores extremos
+                    df[column] = df[column].clip(-1e10, 1e10)
+                elif df[column].dtype == 'object':
+                    # Para strings, reemplazar NaN con string vacío
+                    df[column] = df[column].fillna('')
+                    # Asegurar que son strings
+                    df[column] = df[column].astype(str)
+            
+            print("V1.3: Valores problemáticos limpiados")
+            return df
+            
+        except Exception as e:
+            print(f"ADVERTENCIA V1.3: Error limpiando valores: {e}")
+            return df
+    
+    def limpiar_km_interno_seguro(self, km_text):
+        """V1.3: Función auxiliar SEGURA para limpiar KM"""
+        try:
+            if pd.isna(km_text) or km_text == 'No especificado' or km_text == '' or km_text == 'nan':
+                return 0
+            
+            km_str = str(km_text).replace('.', '').replace(',', '').replace(' ', '')
+            numeros = re.findall(r'\d+', km_str)
+            if numeros:
+                km_val = int(''.join(numeros))
+                # Limitar a rango razonable
+                return max(0, min(km_val, 999999))
+            return 0
+        except:
+            return 0
+    
+    def limpiar_ano_interno_seguro(self, ano_text):
+        """V1.3: Función auxiliar SEGURA para limpiar año"""
+        try:
+            if pd.isna(ano_text) or ano_text == 'No especificado' or ano_text == '' or ano_text == 'nan':
+                return 0
+            
+            ano_str = str(ano_text)
+            numeros = re.findall(r'\d{4}', ano_str)
+            if numeros:
+                ano = int(numeros[0])
+                if 1990 <= ano <= datetime.now().year + 1:
+                    return ano
+            return 0
+        except:
+            return 0
+    
     def limpiar_km_interno(self, km_text):
         """Funcion auxiliar para limpiar KM"""
-        if pd.isna(km_text) or km_text == 'No especificado':
-            return 0
-        numeros = re.findall(r'\d+', str(km_text).replace('.', '').replace(',', ''))
-        if numeros:
-            return int(''.join(numeros))
-        return 0
+        return self.limpiar_km_interno_seguro(km_text)
     
     def limpiar_ano_interno(self, ano_text):
         """Funcion auxiliar para limpiar año"""
-        if pd.isna(ano_text) or ano_text == 'No especificado':
-            return 0
-        numeros = re.findall(r'\d{4}', str(ano_text))
-        if numeros:
-            ano = int(numeros[0])
-            if 1990 <= ano <= datetime.now().year + 1:
-                return ano
-        return 0
+        return self.limpiar_ano_interno_seguro(ano_text)
     
     def primera_ejecucion(self, df_nuevo):
         """Crea el historico por primera vez"""
@@ -416,29 +476,23 @@ class AnalizadorHistoricoCoches:
         # Columnas de control
         df_historico['Primera_Deteccion'] = self.fecha_display
         df_historico['Estado'] = 'activo'
-        df_historico['Fecha_Venta'] = pd.NA
+        df_historico['Fecha_Venta'] = ''  # V1.3: String vacío en lugar de pd.NA
         
-        # Columna de precio para la fecha actual (SOLO CONTADO, renombrado a Precio_)
+        # Columna de precio para la fecha actual
         col_precio_hoy = f"Precio_{self.fecha_display}"
         df_historico[col_precio_hoy] = df_historico['Precio_Contado']
         
-        # Eliminar columnas que no queremos en Google Sheets
-        columnas_a_eliminar = [
-            'Precio_Contado', 
-            'Precio_Financiado',  # No la queremos
-            'KM_Numerico_Internal',  # Solo para uso interno
-            'Ano_Numerico_Internal'  # Solo para uso interno
-        ]
+        # Asegurar que existen columnas internas ANTES del ordenamiento
+        if 'KM_Numerico_Internal' not in df_historico.columns:
+            df_historico['KM_Numerico_Internal'] = df_historico['KM'].apply(self.limpiar_km_interno_seguro)
+        if 'Ano_Numerico_Internal' not in df_historico.columns:
+            df_historico['Ano_Numerico_Internal'] = df_historico['Ano'].apply(self.limpiar_ano_interno_seguro)
         
-        columnas_existentes_a_eliminar = [col for col in columnas_a_eliminar if col in df_historico.columns]
-        if columnas_existentes_a_eliminar:
-            df_historico = df_historico.drop(columnas_existentes_a_eliminar, axis=1)
+        # V1.3: Limpiar valores problemáticos ANTES de ordenar
+        df_historico = self.limpiar_valores_problematicos_lectura(df_historico)
         
-        # CORRECCION V1.2: Reordenar columnas con precios al final
-        df_historico = self.reordenar_columnas_consistente(df_historico)
-        
-        # Ordenar por vendedor y kilometraje
-        df_historico = self.ordenar_dataframe(df_historico)
+        # Ordenar ANTES de eliminar columnas
+        df_historico = self.ordenar_dataframe_seguro(df_historico)
         
         self.stats['total_historico'] = len(df_historico)
         self.stats['coches_nuevos'] = len(df_historico)
@@ -447,7 +501,7 @@ class AnalizadorHistoricoCoches:
         return df_historico
     
     def procesar_coches_nuevos_y_existentes(self, df_nuevo, df_historico):
-        """Procesa coches nuevos y actualiza existentes"""
+        """Procesa coches nuevos y actualiza existentes - V1.3 CORREGIDO"""
         try:
             print("Procesando cambios en el inventario...")
             
@@ -476,13 +530,13 @@ class AnalizadorHistoricoCoches:
             
             # Preparar dataframe actualizado
             df_actualizado = df_historico.copy()
-            df_actualizado[col_precio_hoy] = pd.NA
+            df_actualizado[col_precio_hoy] = ''  # V1.3: String vacío en lugar de pd.NA
             
             # PROCESAR COCHES EXISTENTES
             for url_coche in coches_existentes_urls:
                 try:
                     fila_nueva = df_nuevo[df_nuevo['URL'] == url_coche].iloc[0]
-                    precio_nuevo = fila_nueva['Precio_Contado']
+                    precio_nuevo = str(fila_nueva['Precio_Contado'])  # V1.3: Convertir a string
                     
                     mask = df_actualizado['URL'] == url_coche
                     df_actualizado.loc[mask, col_precio_hoy] = precio_nuevo
@@ -493,7 +547,7 @@ class AnalizadorHistoricoCoches:
                         col_precio_anterior = f"Precio_{fecha_anterior}"
                         if col_precio_anterior in df_actualizado.columns:
                             precio_anterior = df_actualizado.loc[mask, col_precio_anterior].iloc[0]
-                            if pd.notna(precio_anterior) and precio_anterior != precio_nuevo:
+                            if precio_anterior and str(precio_anterior) != precio_nuevo:
                                 self.cambios_precio.append({
                                     'Marca': fila_nueva['Marca'],
                                     'Modelo': fila_nueva['Modelo'],
@@ -548,21 +602,21 @@ class AnalizadorHistoricoCoches:
                         'URL': str(fila_nueva['URL']),
                         'Primera_Deteccion': self.fecha_display,
                         'Estado': 'activo',
-                        'Fecha_Venta': pd.NA
+                        'Fecha_Venta': ''  # V1.3: String vacío
                     }
                     
-                    # Anadir caracteristicas del coche si existen en el dataframe original
+                    # Anadir caracteristicas del coche con nombres transformados
                     caracteristicas_coche = ['Tipo', 'Plazas', 'Puertas', 'Combustible', 'Potencia', 'Conduccion']
                     for caracteristica in caracteristicas_coche:
                         if caracteristica in fila_nueva:
                             nueva_fila[caracteristica] = str(fila_nueva[caracteristica]) if pd.notna(fila_nueva[caracteristica]) else 'No especificado'
                     
-                    # Inicializar todas las columnas de precios anteriores con NA
+                    # Inicializar todas las columnas de precios anteriores con string vacío
                     for col_precio in columnas_precios:
-                        nueva_fila[col_precio] = pd.NA
+                        nueva_fila[col_precio] = ''
                     
                     # Anadir precio para la fecha actual
-                    nueva_fila[col_precio_hoy] = fila_nueva['Precio_Contado']
+                    nueva_fila[col_precio_hoy] = str(fila_nueva['Precio_Contado'])
                     
                     # Crear columnas internas para ordenamiento (NO se guardaran en sheets)
                     nueva_fila['KM_Numerico_Internal'] = fila_nueva.get('KM_Numerico_Internal', 0)
@@ -582,17 +636,16 @@ class AnalizadorHistoricoCoches:
                     print(f"Error procesando coche nuevo: {str(e)}")
                     continue
             
-            # Regenerar columnas internas para ordenamiento de coches existentes
-            if 'KM_Numerico_Internal' not in df_actualizado.columns:
-                df_actualizado['KM_Numerico_Internal'] = df_actualizado['KM'].apply(self.limpiar_km_interno)
-            if 'Ano_Numerico_Internal' not in df_actualizado.columns:
-                df_actualizado['Ano_Numerico_Internal'] = df_actualizado['Ano'].apply(self.limpiar_ano_interno)
+            # V1.3: Regenerar columnas internas para TODOS los coches
+            print("V1.3: Regenerando columnas internas para todos los coches...")
+            df_actualizado['KM_Numerico_Internal'] = df_actualizado['KM'].apply(self.limpiar_km_interno_seguro)
+            df_actualizado['Ano_Numerico_Internal'] = df_actualizado['Ano'].apply(self.limpiar_ano_interno_seguro)
             
-            # CORRECCION V1.2: Reordenar columnas con precios al final
-            df_actualizado = self.reordenar_columnas_consistente(df_actualizado)
+            # V1.3: Limpiar valores problemáticos
+            df_actualizado = self.limpiar_valores_problematicos_lectura(df_actualizado)
             
-            # Ordenar resultado final
-            df_actualizado = self.ordenar_dataframe(df_actualizado)
+            # Ordenar resultado final con función segura
+            df_actualizado = self.ordenar_dataframe_seguro(df_actualizado)
             
             return df_actualizado
             
@@ -600,83 +653,18 @@ class AnalizadorHistoricoCoches:
             print(f"ERROR critico en procesamiento: {str(e)}")
             raise
     
-    def reordenar_columnas_consistente(self, df):
-        """
-        CORRECCION V1.2: Reordena las columnas en el orden específico solicitado
-        Orden: Datos básicos -> Características -> Control -> PRECIOS AL FINAL
-        """
+    def ordenar_dataframe_seguro(self, df):
+        """V1.3: Ordena el dataframe de forma SEGURA"""
         try:
-            print("V1.2: Reordenando columnas con PRECIOS AL FINAL...")
+            print("V1.3: Ordenando datos de forma segura...")
             
-            # PASO 1: Datos básicos del coche
-            columnas_datos_basicos = ['ID_Unico_Coche', 'Marca', 'Modelo', 'Vendedor', 'Ano', 'KM']
+            # Verificar que existen las columnas necesarias
+            if 'KM_Numerico_Internal' not in df.columns:
+                print("ADVERTENCIA: Regenerando KM_Numerico_Internal para ordenamiento")
+                df['KM_Numerico_Internal'] = df['KM'].apply(self.limpiar_km_interno_seguro)
             
-            # PASO 2: Características del coche  
-            columnas_caracteristicas = ['Tipo', 'Plazas', 'Puertas', 'Combustible', 'Potencia', 'Conduccion']
-            
-            # PASO 3: URL y control
-            columnas_url_control = ['URL', 'Primera_Deteccion', 'Estado', 'Fecha_Venta']
-            
-            # PASO 4: Obtener columnas de precios (ordenadas cronológicamente)
-            columnas_precios = [col for col in df.columns if col.startswith('Precio_')]
-            
-            # Ordenar columnas de precios cronológicamente
-            def ordenar_fecha_precio(col_precio):
-                try:
-                    fecha_str = col_precio.replace('Precio_', '')
-                    fecha_obj = datetime.strptime(fecha_str, "%d/%m/%Y")
-                    return fecha_obj
-                except:
-                    return datetime.min  # Poner al principio si no se puede parsear
-            
-            columnas_precios.sort(key=ordenar_fecha_precio)
-            
-            # CONSTRUIR ORDEN FINAL: Básicos -> Características -> Control -> PRECIOS AL FINAL
-            columnas_ordenadas = []
-            
-            # 1. Añadir columnas de datos básicos
-            for col in columnas_datos_basicos:
-                if col in df.columns:
-                    columnas_ordenadas.append(col)
-            
-            # 2. Añadir columnas de características
-            for col in columnas_caracteristicas:
-                if col in df.columns:
-                    columnas_ordenadas.append(col)
-            
-            # 3. Añadir columnas de URL y control
-            for col in columnas_url_control:
-                if col in df.columns:
-                    columnas_ordenadas.append(col)
-            
-            # 4. AÑADIR PRECIOS AL FINAL (ordenados cronológicamente)
-            columnas_ordenadas.extend(columnas_precios)
-            
-            # 5. Añadir cualquier columna extra que no esté en las listas (excepto internas)
-            for col in df.columns:
-                if col not in columnas_ordenadas and not col.endswith('_Internal'):
-                    columnas_ordenadas.append(col)
-            
-            # Reordenar DataFrame
-            columnas_existentes = [col for col in columnas_ordenadas if col in df.columns]
-            df_reordenado = df[columnas_existentes]
-            
-            print(f"V1.2: Columnas reordenadas:")
-            print(f"   - Datos básicos: {[col for col in columnas_datos_basicos if col in df.columns]}")
-            print(f"   - Características: {[col for col in columnas_caracteristicas if col in df.columns]}")
-            print(f"   - Control: {[col for col in columnas_url_control if col in df.columns]}")
-            print(f"   - Precios al FINAL: {columnas_precios}")
-            
-            return df_reordenado
-            
-        except Exception as e:
-            print(f"ADVERTENCIA: Error reordenando columnas: {str(e)}")
-            return df
-
-    def ordenar_dataframe(self, df):
-        """Ordena el dataframe por Vendedor y luego por Kilometraje (mayor a menor)"""
-        try:
-            print("Ordenando datos por Vendedor y Kilometraje...")
+            # Asegurar que las columnas de ordenamiento son numéricas
+            df['KM_Numerico_Internal'] = pd.to_numeric(df['KM_Numerico_Internal'], errors='coerce').fillna(0)
             
             # Separar coches activos y vendidos
             df_activos = df[df['Estado'] == 'activo'].copy()
@@ -684,103 +672,153 @@ class AnalizadorHistoricoCoches:
             
             # Ordenar activos por Vendedor y luego por KM_Numerico_Internal (mayor a menor)
             if not df_activos.empty:
-                df_activos = df_activos.sort_values(
-                    ['Vendedor', 'KM_Numerico_Internal'], 
-                    ascending=[True, False],  # Vendedor A-Z, KM mayor a menor
-                    na_position='last'
-                )
+                try:
+                    df_activos = df_activos.sort_values(
+                        ['Vendedor', 'KM_Numerico_Internal'], 
+                        ascending=[True, False],
+                        na_position='last'
+                    )
+                except Exception as e:
+                    print(f"ADVERTENCIA: Error ordenando activos: {e}")
             
             # Ordenar vendidos por fecha de venta
             if not df_vendidos.empty and 'Fecha_Venta' in df_vendidos.columns:
-                df_vendidos = df_vendidos.sort_values(
-                    'Fecha_Venta', 
-                    ascending=False,
-                    na_position='last'
-                )
+                try:
+                    df_vendidos = df_vendidos.sort_values(
+                        'Fecha_Venta', 
+                        ascending=False,
+                        na_position='last'
+                    )
+                except Exception as e:
+                    print(f"ADVERTENCIA: Error ordenando vendidos: {e}")
             
             # Concatenar: activos arriba, vendidos abajo
             df_ordenado = pd.concat([df_activos, df_vendidos], ignore_index=True)
             
+            print("V1.3: Ordenamiento completado")
             return df_ordenado
             
         except Exception as e:
-            print(f"ADVERTENCIA: Error ordenando datos: {str(e)}")
+            print(f"ADVERTENCIA V1.3: Error ordenando datos: {str(e)}")
             return df
     
     def preparar_dataframe_para_sheets(self, df_historico):
-        """Prepara el dataframe eliminando columnas internas antes de guardar en Google Sheets"""
-        print("Preparando datos para Google Sheets...")
+        """V1.3: Prepara el dataframe con limpieza EXHAUSTIVA para Google Sheets"""
+        print("V1.3: Preparando datos para Google Sheets con limpieza exhaustiva...")
         
         df_sheets = df_historico.copy()
         
-        # ELIMINAR COLUMNAS INTERNAS (no queremos que aparezcan en Google Sheets)
-        columnas_internas = [
+        # PASO 1: ELIMINAR COLUMNAS NO DESEADAS
+        columnas_a_eliminar = [
             'KM_Numerico_Internal',
-            'Ano_Numerico_Internal'
+            'Ano_Numerico_Internal',
+            'Precio_Contado',
+            'Precio Financiado',
+            'Fecha_Extraccion'
         ]
         
-        columnas_a_eliminar = [col for col in columnas_internas if col in df_sheets.columns]
-        if columnas_a_eliminar:
-            df_sheets = df_sheets.drop(columnas_a_eliminar, axis=1)
-            print(f"Columnas internas eliminadas: {columnas_a_eliminar}")
+        columnas_eliminadas = [col for col in columnas_a_eliminar if col in df_sheets.columns]
+        if columnas_eliminadas:
+            df_sheets = df_sheets.drop(columnas_eliminadas, axis=1)
+            print(f"V1.3: Columnas eliminadas: {columnas_eliminadas}")
         
-        # ORDEN FORZADO DEFINITIVO - SIN MARGEN DE ERROR
-        print("APLICANDO ORDEN FORZADO DEFINITIVO...")
+        # PASO 2: LIMPIEZA EXHAUSTIVA DE VALORES PROBLEMÁTICOS
+        print("V1.3: Aplicando limpieza exhaustiva...")
         
-        # Definir orden exacto
-        orden_definitivo = [
+        # Reemplazar infinitos y NaN
+        df_sheets = df_sheets.replace([np.inf, -np.inf], np.nan)
+        
+        # Procesar cada columna según su tipo
+        for column in df_sheets.columns:
+            if df_sheets[column].dtype in ['float64', 'int64', 'float32', 'int32']:
+                # Para columnas numéricas
+                df_sheets[column] = pd.to_numeric(df_sheets[column], errors='coerce')
+                df_sheets[column] = df_sheets[column].fillna(0)
+                df_sheets[column] = df_sheets[column].clip(-1e10, 1e10)
+                # Convertir a int si son enteros para evitar problemas de float
+                if df_sheets[column].notna().all() and (df_sheets[column] % 1 == 0).all():
+                    df_sheets[column] = df_sheets[column].astype(int)
+            else:
+                # Para columnas de texto
+                df_sheets[column] = df_sheets[column].fillna('')
+                df_sheets[column] = df_sheets[column].astype(str)
+                df_sheets[column] = df_sheets[column].replace(['nan', 'None', 'NaN', 'null'], '')
+        
+        # PASO 3: ORDEN FINAL CON NOMBRES TRANSFORMADOS
+        print("V1.3: Aplicando orden con precios al final...")
+        
+        orden_basico = [
             'ID_Unico_Coche', 'Marca', 'Modelo', 'Vendedor', 'Ano', 'KM',
-            'Tipo', 'Nº Plazas', 'Nº Puertas', 'Combustible', 'Potencia', 'Conducción',
+            'Tipo', 'Plazas', 'Puertas', 'Combustible', 'Potencia', 'Conduccion',
             'URL', 'Primera_Deteccion', 'Estado', 'Fecha_Venta'
         ]
         
-        # Agregar columnas de precios al final (ordenadas cronológicamente)
+        # Obtener columnas de precios ordenadas cronológicamente
         columnas_precios = [col for col in df_sheets.columns if col.startswith('Precio_')]
         def ordenar_fecha_precio(col_precio):
             try:
                 fecha_str = col_precio.replace('Precio_', '')
-                fecha_obj = datetime.strptime(fecha_str, "%d/%m/%Y")
-                return fecha_obj
+                return datetime.strptime(fecha_str, "%d/%m/%Y")
             except:
                 return datetime.min
         columnas_precios.sort(key=ordenar_fecha_precio)
         
         # Construir orden final
         orden_final = []
-        for col in orden_definitivo:
+        for col in orden_basico:
             if col in df_sheets.columns:
                 orden_final.append(col)
-        
-        # Agregar precios al final
         orden_final.extend(columnas_precios)
         
-        # FORZAR ESTE ORDEN
-        df_sheets = df_sheets[orden_final]
-        
-        print(f"ORDEN DEFINITIVO APLICADO:")
-        for i, col in enumerate(orden_final, 1):
-            if col.startswith('Precio_'):
-                print(f"   {i:2d}. {col} <-- PRECIO")
-            else:
-                print(f"   {i:2d}. {col}")
-        
-        return df_sheets
+        # Aplicar orden
+        try:
+            df_final = df_sheets[orden_final]
+            
+            # VERIFICACIÓN FINAL: Asegurar que no hay valores problemáticos
+            for column in df_final.columns:
+                if df_final[column].dtype in ['float64', 'int64']:
+                    # Última verificación de valores problemáticos
+                    has_inf = np.isinf(df_final[column]).any()
+                    has_nan = df_final[column].isna().any()
+                    if has_inf or has_nan:
+                        print(f"ADVERTENCIA V1.3: Limpiando valores finales en {column}")
+                        df_final[column] = df_final[column].replace([np.inf, -np.inf], 0)
+                        df_final[column] = df_final[column].fillna(0)
+            
+            print(f"V1.3: Preparación completada - {len(df_final)} filas, {len(df_final.columns)} columnas")
+            print(f"V1.3: Precios al final: {columnas_precios}")
+            
+            return df_final
+            
+        except Exception as e:
+            print(f"ERROR V1.3 aplicando orden: {e}")
+            return df_sheets
     
     def guardar_historico_actualizado(self, df_historico):
-        """Guarda el historico actualizado en Google Sheets"""
+        """V1.3: Guarda el historico con verificaciones adicionales"""
         try:
-            print("Guardando historico actualizado en Google Sheets...")
+            print("V1.3: Guardando historico con verificaciones...")
             
-            # Preparar datos (eliminar columnas internas y reordenar)
+            # Preparar datos con limpieza exhaustiva
             df_sheets = self.preparar_dataframe_para_sheets(df_historico)
             
-            # Debug: Mostrar orden de columnas final
-            print(f"ORDEN FINAL DE COLUMNAS:")
-            for i, col in enumerate(df_sheets.columns, 1):
-                if col.startswith('Precio_'):
-                    print(f"   {i:2d}. {col} <-- PRECIO")
-                else:
-                    print(f"   {i:2d}. {col}")
+            # Verificación adicional antes de guardar
+            print("V1.3: Verificación final antes de guardar...")
+            total_nan = df_sheets.isna().sum().sum()
+            total_inf = 0
+            
+            for col in df_sheets.columns:
+                if df_sheets[col].dtype in ['float64', 'int64']:
+                    total_inf += np.isinf(df_sheets[col]).sum()
+            
+            print(f"V1.3: Verificación - NaN: {total_nan}, Infinitos: {total_inf}")
+            
+            if total_nan > 0 or total_inf > 0:
+                print("V1.3: Aplicando limpieza final de emergencia...")
+                df_sheets = df_sheets.fillna('')
+                for col in df_sheets.columns:
+                    if df_sheets[col].dtype in ['float64', 'int64']:
+                        df_sheets[col] = df_sheets[col].replace([np.inf, -np.inf], 0)
             
             # Abrir spreadsheet
             spreadsheet = self.gs_handler.client.open_by_key(self.sheet_id)
@@ -789,32 +827,48 @@ class AnalizadorHistoricoCoches:
             try:
                 worksheet_historico = spreadsheet.worksheet("Data_Historico")
                 worksheet_historico.clear()
-                print("Hoja Data_Historico limpiada")
+                print("V1.3: Hoja Data_Historico limpiada")
             except:
                 worksheet_historico = spreadsheet.add_worksheet(
                     title="Data_Historico",
                     rows=len(df_sheets) + 10,
                     cols=len(df_sheets.columns) + 5
                 )
-                print("Hoja Data_Historico creada")
+                print("V1.3: Hoja Data_Historico creada")
             
-            # Preparar datos para subir
+            # Preparar datos para subir - CONVERSIÓN SEGURA
             headers = df_sheets.columns.values.tolist()
-            data_rows = df_sheets.fillna('').values.tolist()  # Reemplazar NA con string vacio
+            
+            # Convertir datos a formato seguro para Google Sheets
+            data_rows = []
+            for _, row in df_sheets.iterrows():
+                safe_row = []
+                for value in row:
+                    if pd.isna(value):
+                        safe_row.append('')
+                    elif isinstance(value, (int, float)):
+                        if np.isinf(value) or np.isnan(value):
+                            safe_row.append(0)
+                        else:
+                            safe_row.append(value)
+                    else:
+                        safe_row.append(str(value))
+                data_rows.append(safe_row)
+            
             all_data = [headers] + data_rows
             
             # Subir datos
             worksheet_historico.update(all_data)
             
-            print(f"EXITO: Historico guardado con {len(df_sheets)} coches")
-            print(f"Columnas precio: {len([col for col in headers if col.startswith('Precio_')])}")
-            print(f"V1.2: PRECIOS AL FINAL - Orden corregido")
+            print(f"V1.3: EXITO - Historico guardado con {len(df_sheets)} coches")
+            columnas_precio = len([col for col in headers if col.startswith('Precio_')])
+            print(f"V1.3: Columnas precio: {columnas_precio}")
             print(f"URL: https://docs.google.com/spreadsheets/d/{self.sheet_id}")
             
             return True
             
         except Exception as e:
-            print(f"ERROR guardando historico: {str(e)}")
+            print(f"ERROR V1.3 guardando historico: {str(e)}")
             return False
     
     def mostrar_resumen_final(self):
@@ -823,7 +877,7 @@ class AnalizadorHistoricoCoches:
         self.stats['tiempo_ejecucion'] = tiempo_total
         
         print(f"\n{'='*80}")
-        print("PROCESAMIENTO COMPLETADO - ANALISIS HISTORICO COCHES V1.2 ORDEN CORREGIDO")
+        print("PROCESAMIENTO COMPLETADO - ANALISIS HISTORICO COCHES V1.3 ERROR CORREGIDO")
         print("="*80)
         print(f"Fecha procesada: {self.fecha_display}")
         print(f"Coches en scraper: {self.stats['total_archivo_nuevo']:,}")
@@ -836,23 +890,17 @@ class AnalizadorHistoricoCoches:
         
         if self.cambios_precio:
             print(f"\nCAMBIOS DE PRECIO DETECTADOS: {len(self.cambios_precio)}")
-            for cambio in self.cambios_precio[:3]:  # Mostrar solo los primeros 3
+            for cambio in self.cambios_precio[:3]:
                 print(f"  {cambio['Marca']} {cambio['Modelo']} - {cambio['Vendedor']}")
                 print(f"    {cambio['Precio_Anterior']} -> {cambio['Precio_Nuevo']}")
         
-        if self.stats['errores'] > 0:
-            print(f"\nADVERTENCIAS:")
-            print(f"Se produjeron {self.stats['errores']} errores durante el procesamiento")
-        
         print(f"\nNueva columna: Precio_{self.fecha_display}")
-        print("CORRECCION V1.2 - ORDEN COLUMNAS:")
-        print("   Datos básicos: ID_Unico_Coche Marca Modelo Vendedor Ano KM")
-        print("   Características: Tipo Plazas Puertas Combustible Potencia Conduccion") 
-        print("   Control: URL Primera_Deteccion Estado Fecha_Venta")
-        print("   PRECIOS AL FINAL: Precio_DD/MM/YYYY (cronológico)")
-        print("   SIN columnas numericas auxiliares en Google Sheets")
-        print("   SIN precio financiado")
-        print("   Ordenacion: Vendedor -> Kilometraje (mayor a menor)")
+        print("CORRECCION V1.3 - ERROR JSON CORREGIDO:")
+        print("   Regeneración de columnas internas al leer histórico")
+        print("   Limpieza exhaustiva de valores problemáticos")
+        print("   Manejo seguro de tipos de datos mixtos")
+        print("   Fix completo para 'Out of range float values'")
+        print("   Orden columnas: Básicos -> Características -> Control -> PRECIOS AL FINAL")
     
     def ejecutar(self):
         """Funcion principal que ejecuta todo el proceso"""
@@ -891,7 +939,7 @@ class AnalizadorHistoricoCoches:
             return True
             
         except Exception as e:
-            print(f"\nERROR CRITICO: {str(e)}")
+            print(f"\nERROR CRITICO V1.3: {str(e)}")
             print("El procesamiento no se pudo completar correctamente")
             
             import traceback
@@ -901,36 +949,26 @@ class AnalizadorHistoricoCoches:
 
 def main():
     """Funcion principal del analizador"""
-    print("Iniciando Analizador Historico COCHES V1.2 ORDEN COLUMNAS CORREGIDO...")
-    print("CORRECCION V1.2:")
-    print("    PRECIOS AL FINAL: Las columnas de precios van al final del dataframe")
-    print("    Orden específico: Datos básicos -> Características -> Control -> Precios")
-    print("    Formato fecha corregido: SCR-J1 DD/MM/YY (año corto)")
-    print("    Lee datos del scraper desde Google Sheets (SCR-J1 y SCR-J2)")
-    print("    Unifica ambos jobs en un solo dataset")
-    print("    SOLO rastrea precio al contado (columnas Precio_FECHA)")
-    print("    NO incluye precio financiado")
-    print("    NO guarda columnas numericas auxiliares en Google Sheets")
-    print("    USA URL como identificador unico")
-    print("    Detecta ventas cuando coches desaparecen")
-    print("    Ordena por Vendedor y Kilometraje (mayor a menor)")
-    print("    Guarda precios TODOS los dias (suban o bajen)")
+    print("Iniciando Analizador Historico COCHES V1.3 ERROR JSON CORREGIDO...")
+    print("CORRECCION V1.3:")
+    print("    FIX COMPLETO para 'Out of range float values are not JSON compliant'")
+    print("    Regeneración de columnas internas al leer histórico existente")
+    print("    Limpieza exhaustiva de valores problemáticos (NaN, inf, extremos)")
+    print("    Manejo seguro de tipos de datos mixtos (histórico + scraper)")
+    print("    Conversión segura a formato Google Sheets compatible")
+    print("    Verificaciones adicionales antes de guardar")
+    print("    PRECIOS AL FINAL del dataframe (orden corregido)")
     print()
     
     analizador = AnalizadorHistoricoCoches()
     exito = analizador.ejecutar()
     
     if exito:
-        print("\nPROCESO COMPLETADO EXITOSAMENTE V1.2 ORDEN CORREGIDO")
-        print("FORMATO DEL HISTORICO MODIFICADO:")
-        print("    Columnas básicas: ID_Unico_Coche, Marca, Modelo, Vendedor, Ano, KM")
-        print("    Columnas características: Tipo, Plazas, Puertas, Combustible, Potencia, Conduccion")
-        print("    Columnas de control: URL, Primera_Deteccion, Estado, Fecha_Venta")
-        print("    Columnas por fecha: Precio_DD/MM/YYYY (SOLO CONTADO) AL FINAL")
-        print("    SIN columnas numericas auxiliares en Google Sheets")
-        print("    ORDENACION: Activos arriba (Vendedor->KM desc), vendidos abajo")
-        print("    IDENTIFICACION: URL como clave unica principal")
-        print("    PRECIOS CRONOLOGICOS: Se acumulan al final en orden temporal")
+        print("\nPROCESO COMPLETADO EXITOSAMENTE V1.3")
+        print("CORRECCION V1.3 APLICADA:")
+        print("    Error 'Out of range float values' SOLUCIONADO")
+        print("    Histórico actualizado correctamente")
+        print("    Precios acumulándose cronológicamente al final")
         
         return True
     else:
