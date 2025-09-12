@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚗 WALLAPOP CAR SCRAPER 🚗
+# 🚗 CAR SCRAPER 🚗
 
 **Sistema automatizado de extracción de datos para concesionarios en Wallapop**
 
@@ -11,7 +11,6 @@
 [![License](https://img.shields.io/badge/License-Private-red)](LICENSE)
 
 </div>
-
 
 ---
 
@@ -26,35 +25,6 @@ Este sistema monitorea 18 concesionarios profesionales en Wallapop, extrayendo y
 - **Completitud de datos:** superior al **95%**
 - **Tiempo medio de ejecución:** aproximadamente **5 horas** por job en paralelo
 - **Frecuencia:** ejecución automática diaria a las **06:00** (hora España)
-
-## ⚙️ Configuración del Sistema
-
-### Organización de Concesionarios
-
-Los concesionarios están distribuidos en tres grupos para optimizar la ejecución y equilibrar la carga:
-
-| Grupo      | Clasificación     | Concesionarios incluidos                                              |
-|------------|-------------------|------------------------------------------------------------------------|
-| **Grupo 1** | Volumen bajo      | DURSAN D., Beatriz D., GESTICAR G., Garage Club C.                    |
-| **Grupo 2** | Volumen medio     | Red MundiCars, OCASIONPLUS, Red CRESTANEVADA                          |
-| **Grupo 3** | Volumen alto      | INTEGRAL MOTION, FlexCar   
-
-### Modos de Ejecución
-
-El sistema admite tres modos de ejecución, adaptados a distintos contextos operativos:
-
-- **Producción:**  
-  Ejecución programada diariamente a las 06:00 (hora España). Procesa automáticamente todos los concesionarios (más de 18) en una única ejecución secuencial.
-
-- **Prueba:**  
-  Ejecución manual para testeo. Cuenta con dos variantes:
-  
-  - **Prueba rápida:** procesa únicamente `DURSAN D.`, útil para validar el flujo general de scraping, subida y conexión.
-  - **Prueba de extracción:** procesa tres concesionarios específicos con **formatos de precio distintos**, diseñada para verificar la robustez del sistema frente a variaciones en los datos.
-
-- **Paralelo (Distribuido en Jobs):**  
-  Utiliza un workflow alternativo con **dos jobs independientes (`job1` y `job2`)** que se ejecutan en paralelo dentro de GitHub Actions.  
-  Cada job procesa distintos grupos de concesionarios, lo que permite reducir significativamente el tiempo total de ejecución.
 
 ## 🔍 Estructura de Datos
 
@@ -75,7 +45,6 @@ El sistema admite tres modos de ejecución, adaptados a distintos contextos oper
 | **Conducción**          | Tipo de cambio: manual o automático         |
 | **URL**                 | Enlace al anuncio original en Wallapop      |
 | **Fecha Extracción**    | Fecha y hora en que se extrajo la información |
-
 
 ###  📞 Contacto
 > Para consultas técnicas utilizar sistema **GitHub Issues**
